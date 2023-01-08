@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="Mark Otto, Jacob Thornton, and Bootstrap contributors">
+    <meta name="generator" content="Hugo 0.104.2">
+    <title>Register</title>
+
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom styles for this template -->
+    <link href="css/register.css" rel="stylesheet">
+
+    <style>
+      .bd-placeholder-img {
+        font-size: 1.125rem;
+        text-anchor: middle;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        user-select: none;
+      }
+
+      @media (min-width: 768px) {
+        .bd-placeholder-img-lg {
+          font-size: 3.5rem;
+        }
+      }
+
+      .bi {
+        vertical-align: -.125em;
+        fill: currentColor;
+      }
+
+      .nav-scroller {
+        position: relative;
+        z-index: 2;
+        height: 2.75rem;
+        overflow-y: hidden;
+      }
+
+      .nav-scroller .nav {
+        display: flex;
+        flex-wrap: nowrap;
+        padding-bottom: 1rem;
+        margin-top: -1px;
+        overflow-x: auto;
+        text-align: center;
+        white-space: nowrap;
+        -webkit-overflow-scrolling: touch;
+      }
+    </style>
+
+    
+  </head>
+  <body class="bg-light">
+    
+<div class="container">
+  <main>
+    <div class="py-5 text-center">
+      <h1 class="display-6">K_K</h1>
+      <h2>Create new account</h2>
+    </div>
+
+    <div class="row g-5">
+      <div class="col-md-4 col-lg-3"></div>
+
+      <div class="col-md-4 col-lg-6">
+        <h4 class="mb-3">Sign up</h4>
+        <form class="needs-validation" novalidate>
+          <div class="row g-3">
+            <div class="col-sm-6">
+              <label for="firstName" class="form-label">First name</label>
+              <input type="text" class="form-control" id="firstName" placeholder="" value="" required>
+              <div class="invalid-feedback">
+                Valid first name is required.
+              </div>
+            </div>
+
+            <div class="col-sm-6">
+              <label for="lastName" class="form-label">Last name <span class="text-muted">(Optional)</span></label>
+              <input type="text" class="form-control" id="lastName" placeholder="" value="">
+              <div class="invalid-feedback">
+                Valid last name is required.
+              </div>
+            </div>
+
+            <div class="col-12">
+              <label for="username" class="form-label">Username</label>
+              <div class="input-group has-validation">
+                <span class="input-group-text">@</span>
+                <input type="text" class="form-control" id="username" placeholder="Username" required>
+              <div class="invalid-feedback">
+                  Valid username is required.
+                </div>
+              </div>
+            </div>
+
+            <div class="col-12">
+              <label for="email" class="form-label">Email <span class="text-muted">(Optional)</span></label>
+              <input type="email" class="form-control" id="email" placeholder="you@example.com">
+              <div class="invalid-feedback">
+                Please enter a valid email address.
+              </div>
+            </div>
+
+            <div class="col-12">
+              <label for="login" class="form-label">Login</label>
+              <input type="text" class="form-control" id="login" placeholder="Login" required>
+              <div class="invalid-feedback">
+                Please enter a valid login.
+              </div>
+            </div>
+
+            <div class="col-12">
+              <label for="password_1" class="form-label">Enter password</label>
+              <input type="password" class="form-control" id="password_1" placeholder="Password" required>
+              <div class="invalid-feedback">
+                Please enter a valid password.
+              </div>
+            </div>
+
+            <div class="col-12">
+              <label for="password_2" class="form-label">Confirm password</label>
+              <input type="password" class="form-control" id="password_2" placeholder="Password" required>
+              <div class="invalid-feedback">
+                Passwords doesn't match.
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <label for="country" class="form-label">Country</label>
+              <select class="form-select" id="country" required>
+                <option value="">Choose...</option>
+                <option>Japan</option>
+                <option>Russian Federation</option>
+                <option>United Kingdom</option>
+              </select>
+              <div class="invalid-feedback">
+                Please select a valid country.
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <label for="city" class="form-label">City <span class="text-muted">(Optional)</span></label>
+              <input type="text" class="form-control" id="city" placeholder="" value="">
+              <div class="invalid-feedback">
+                Valid city is required.
+              </div>
+            </div>
+          </div>
+
+          <hr class="my-4">
+
+          <button class="w-100 btn btn-success btn-lg" type="submit">Sign up</button>
+        </form>
+      </div>
+      <div class="col-md-4 col-lg-3"></div>
+    </div>
+  </main>
+
+  <footer class="my-5 pt-5 text-muted text-center text-small">
+    <p class="mb-1">&copy; 2023 K_K</p>
+    <!-- <ul class="list-inline">
+      <li class="list-inline-item"><a href="#">Privacy</a></li>
+      <li class="list-inline-item"><a href="#">Terms</a></li>
+      <li class="list-inline-item"><a href="#">Support</a></li>
+    </ul> -->
+  </footer>
+</div>
+
+<script>
+  $(function () {
+      $("#datepicker").datepicker({ 
+          autoclose: true, 
+          todayHighlight: true,
+      }).datepicker('update', new Date());
+  });
+</script>
+
+    <script src="js/bootstrap.min.js"></script>
+
+      <script src="js/register.js"></script>
+  </body>
+</html>
