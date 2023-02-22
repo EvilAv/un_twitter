@@ -47,7 +47,10 @@ INSTALLED_APPS = [
     # third party
     # my apps
     'tweets',
+    'custom_users',
 ]
+
+AUTH_USER_MODEL = 'custom_users.CustomUser'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Register</title>
+
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/custom_users/signup.css' %}">
+
+    <style>
+
+    </style>
+
+    
+  </head>
+  <body class="bg-light">
+    
+<div class="container">
+  <main>
+    <div class="py-5 text-center">
+      <h1 class="display-6">K_K</h1>
+      <h2>Регистрация</h2>
+    </div>
+
+    <div class="row g-5">
+      <div class="col-md-4 col-lg-3"></div>
+
+      <div class="col-md-4 col-lg-6">
+        <h4 class="mb-3">Создайте новый аккаунт</h4>
+        <form class="needs-validation" novalidate>
+          <div class="row g-3">
+            <div class="col-sm-6">
+              <label for="firstName" class="form-label">Имя</label>
+              <input type="text" class="form-control" id="firstName" placeholder="" value="" required>
+              <div class="invalid-feedback">
+                Введите корректное имя.
+              </div>
+            </div>
+
+            <div class="col-sm-6">
+              <label for="lastName" class="form-label">Фамилия <span class="text-muted">(Необязательно)</span></label>
+              <input type="text" class="form-control" id="lastName" placeholder="" value="">
+              <div class="invalid-feedback">
+                Введите корректную фамилию.
+              </div>
+            </div>
+
+            <div class="col-12">
+              <label for="username" class="form-label">Имя пользователя</label>
+              <div class="input-group has-validation">
+                <span class="input-group-text">@</span>
+                <input type="text" class="form-control" id="username" placeholder="Имя пользователя" required>
+              <div class="invalid-feedback">
+                  Введите уникальное имя пользователя.
+                </div>
+              </div>
+            </div>
+
+            <div class="col-12">
+              <label for="email" class="form-label">Email <span class="text-muted">(Необязательно)</span></label>
+              <input type="email" class="form-control" id="email" placeholder="you@example.com">
+              <div class="invalid-feedback">
+                Введите корректный e-mail.
+              </div>
+            </div>
+
+            <div class="col-12">
+              <label for="login" class="form-label">Логин</label>
+              <input type="text" class="form-control" id="login" placeholder="Логин" required>
+              <div class="invalid-feedback">
+                Введите корректный логин.
+              </div>
+            </div>
+
+            <div class="col-12">
+              <label for="password_1" class="form-label">Введите пароль</label>
+              <input type="password" class="form-control" id="password_1" placeholder="Пароль" required>
+              <div class="invalid-feedback">
+                Введите корректный пароль.
+              </div>
+            </div>
+
+            <div class="col-12">
+              <label for="password_2" class="form-label">Повторите пароль</label>
+              <input type="password" class="form-control" id="password_2" placeholder="Пароль" required>
+              <div class="invalid-feedback">
+                Пароль не совпадает.
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <label for="country" class="form-label">Страна</label>
+              <select class="form-select" id="country" required>
+                <option value="">Выберите...</option>
+                <option>Великобритания</option>
+                <option>Россия</option>
+                <option>Япония</option>
+              </select>
+              <div class="invalid-feedback">
+                Выберите страну.
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <label for="city" class="form-label">Город <span class="text-muted">(Необязательно)</span></label>
+              <input type="text" class="form-control" id="city" placeholder="" value="">
+              <div class="invalid-feedback">
+                Введите название города.
+              </div>
+            </div>
+          </div>
+
+          <hr class="my-4">
+
+          <button class="w-100 btn btn-success btn-lg" type="submit">Создать аккаунт</button>
+        </form>
+      </div>
+      <div class="col-md-4 col-lg-3"></div>
+    </div>
+  </main>
+
+  <footer class="my-5 pt-5 text-muted text-center text-small">
+    <p class="mb-1">&copy; 2023 K_K</p>
+    <!-- <ul class="list-inline">
+      <li class="list-inline-item"><a href="#">Privacy</a></li>
+      <li class="list-inline-item"><a href="#">Terms</a></li>
+      <li class="list-inline-item"><a href="#">Support</a></li>
+    </ul> -->
+  </footer>
+</div>
+
+<script>
+  $(function () {
+      $("#datepicker").datepicker({ 
+          autoclose: true, 
+          todayHighlight: true,
+      }).datepicker('update', new Date());
+  });
+</script>
+
+    <script src="js/bootstrap.min.js"></script>
+
+    <script src="js/register.js"></script>
+  </body>
+</html>
