@@ -4,7 +4,7 @@ from django.contrib.auth.models import AbstractUser
 
 # Create your models here.
 
-
+# for test user password -> 0SCh^Ok37Rm%
 class CustomUser(AbstractUser):
     bio = models.TextField(max_length=255, null=True, blank=True)
     # username we will use like login

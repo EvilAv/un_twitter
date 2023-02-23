@@ -3,16 +3,11 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Register</title>
+    <title>K_K | Регистрация</title>
 
     {% load static %}
     <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
     <link rel="stylesheet" href="{% static 'css/custom_users/signup.css' %}">
-
-    <style>
-
-    </style>
-
     
   </head>
   <body class="bg-light">
@@ -29,29 +24,40 @@
 
       <div class="col-md-4 col-lg-6">
         <h4 class="mb-3">Создайте новый аккаунт</h4>
-        <form class="needs-validation" novalidate>
+        <form method="post" action="">
+          {% csrf_token %}
+<!--          пример изначального шаблона всегда есть в папке legacy-->
           <div class="row g-3">
+            <div class="col-12">
+              <label class="form-label">Логин</label>
+              <input type="text" class="form-control" placeholder="Логин" name="username">
+              <div class="invalid-feedback">
+                Введите корректный логин.
+              </div>
+            </div>
+
+
             <div class="col-sm-6">
-              <label for="firstName" class="form-label">Имя</label>
-              <input type="text" class="form-control" id="firstName" placeholder="" value="" required>
+              <label class="form-label">Имя</label>
+              <input type="text" class="form-control" name="nickname">
               <div class="invalid-feedback">
                 Введите корректное имя.
               </div>
             </div>
 
-            <div class="col-sm-6">
-              <label for="lastName" class="form-label">Фамилия <span class="text-muted">(Необязательно)</span></label>
-              <input type="text" class="form-control" id="lastName" placeholder="" value="">
-              <div class="invalid-feedback">
-                Введите корректную фамилию.
-              </div>
-            </div>
+<!--            <div class="col-sm-6">-->
+<!--              <label for="lastName" class="form-label">Фамилия <span class="text-muted">(Необязательно)</span></label>-->
+<!--              <input type="text" class="form-control" id="lastName" placeholder="" value="">-->
+<!--              <div class="invalid-feedback">-->
+<!--                Введите корректную фамилию.-->
+<!--              </div>-->
+<!--            </div>-->
 
             <div class="col-12">
-              <label for="username" class="form-label">Имя пользователя</label>
+              <label class="form-label">Имя пользователя</label>
               <div class="input-group has-validation">
                 <span class="input-group-text">@</span>
-                <input type="text" class="form-control" id="username" placeholder="Имя пользователя" required>
+                <input type="text" class="form-control" placeholder="Имя пользователя" name="main_name">
               <div class="invalid-feedback">
                   Введите уникальное имя пользователя.
                 </div>
@@ -59,58 +65,60 @@
             </div>
 
             <div class="col-12">
-              <label for="email" class="form-label">Email <span class="text-muted">(Необязательно)</span></label>
-              <input type="email" class="form-control" id="email" placeholder="you@example.com">
+              <label class="form-label">Email <span class="text-muted">(Необязательно)</span></label>
+              <input type="email" class="form-control" name="email" placeholder="you@example.com">
               <div class="invalid-feedback">
                 Введите корректный e-mail.
               </div>
             </div>
 
-            <div class="col-12">
-              <label for="login" class="form-label">Логин</label>
-              <input type="text" class="form-control" id="login" placeholder="Логин" required>
-              <div class="invalid-feedback">
-                Введите корректный логин.
-              </div>
-            </div>
 
             <div class="col-12">
-              <label for="password_1" class="form-label">Введите пароль</label>
-              <input type="password" class="form-control" id="password_1" placeholder="Пароль" required>
+              <label  class="form-label">Введите пароль</label>
+              <input type="password" class="form-control" placeholder="Пароль" name="password1">
               <div class="invalid-feedback">
                 Введите корректный пароль.
               </div>
             </div>
 
             <div class="col-12">
-              <label for="password_2" class="form-label">Повторите пароль</label>
-              <input type="password" class="form-control" id="password_2" placeholder="Пароль" required>
+              <label class="form-label">Повторите пароль</label>
+              <input type="password" class="form-control" placeholder="Пароль" name="password2">
               <div class="invalid-feedback">
                 Пароль не совпадает.
               </div>
             </div>
 
-            <div class="col-md-6">
-              <label for="country" class="form-label">Страна</label>
-              <select class="form-select" id="country" required>
-                <option value="">Выберите...</option>
-                <option>Великобритания</option>
-                <option>Россия</option>
-                <option>Япония</option>
-              </select>
-              <div class="invalid-feedback">
-                Выберите страну.
-              </div>
-            </div>
+<!--            <div class="col-md-6">-->
+<!--              <label for="country" class="form-label">Страна</label>-->
+<!--              <select class="form-select" id="country" required>-->
+<!--                <option value="">Выберите...</option>-->
+<!--                <option>Великобритания</option>-->
+<!--                <option>Россия</option>-->
+<!--                <option>Япония</option>-->
+<!--              </select>-->
+<!--              <div class="invalid-feedback">-->
+<!--                Выберите страну.-->
+<!--              </div>-->
+<!--            </div>-->
 
-            <div class="col-md-6">
-              <label for="city" class="form-label">Город <span class="text-muted">(Необязательно)</span></label>
-              <input type="text" class="form-control" id="city" placeholder="" value="">
-              <div class="invalid-feedback">
-                Введите название города.
-              </div>
-            </div>
-          </div>
+<!--            <div class="col-md-6">-->
+<!--              <label for="city" class="form-label">Город <span class="text-muted">(Необязательно)</span></label>-->
+<!--              <input type="text" class="form-control" id="city" placeholder="" value="">-->
+<!--              <div class="invalid-feedback">-->
+<!--                Введите название города.-->
+<!--              </div>-->
+<!--            </div>-->
+<!--          </div>-->
+            {% if form.errors %}
+              {% for fields in form %}
+                {% for error in fields.errors %}
+                  <div class="text-danger">
+                    <p class="">{{ error|escape }}</p>
+                  </div>
+                {% endfor %}
+              {% endfor %}
+            {% endif %}
 
           <hr class="my-4">
 
