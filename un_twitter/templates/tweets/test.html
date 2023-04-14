@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block title %}
+Тестовые данный
+{% endblock %}
+{% block content %}
+<h1 class="display-5">Тесты </h1>
+<ul id="tweet-list">
+
+</ul>
+<script>
+    const parent = document.querySelector('#tweet-list');
+    let progress = 40;
+    const pageHeight = document.documentElement.clientHeight;
+
+    loadData(0);
+
+    window.addEventListener('scroll', isEnd);
+
+    function isEnd(){
+        const bottomLineOfHtml = document.documentElement.getBoundingClientRect().bottom;
+        if (bottomLineOfHtml <= pageHeight + 50){
+            loadData(progress);
+            progress+=40;
+        }
+    }
+
+    function loadData(progress){
+        const xhr = new XMLHttpRequest();
+        xhr.responseType = 'json';
+        let url = '/test'+progress;
+        xhr.open('GET', url);
+        xhr.onload = function(){
+            result = xhr.response;
+            if (result.data){
+                for (let item of result.data){
+                    const tweet = document.createElement('li');
+                    tweet.textContent = item.text;
+                    parent.append(tweet);
+                }
+            }
+        }
+        xhr.send();
+    }
+
+</script>
+{% endblock %}
