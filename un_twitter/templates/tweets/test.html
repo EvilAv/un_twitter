@@ -4,6 +4,11 @@
 {% endblock %}
 {% block content %}
 <h1 class="display-5">Тесты </h1>
+<form method="post" action="/test-create" id="test-form">
+    {% csrf_token %}
+    <textarea placeholder="Enter your tweet" name="text"></textarea>
+    <button type="submit">Tweet</button>
+</form>
 <ul id="tweet-list">
 
 </ul>
@@ -17,7 +22,15 @@
     window.addEventListener('scroll', isEnd);
 
     function isEnd(){
+        
+        // if we have enough time it should be rewrite with fetch cause it sends 2 responses while generate one result
+        console.log('message')
+        const t = document.querySelector('.navigation');
+        console.log(t.offsetHeight);
         const bottomLineOfHtml = document.documentElement.getBoundingClientRect().bottom;
+        console.log(bottomLineOfHtml);
+        console.log(pageHeight);
+        console.log('--------------------------------------')
         if (bottomLineOfHtml <= pageHeight + 50){
             loadData(progress);
             progress+=40;
@@ -41,6 +54,49 @@
         }
         xhr.send();
     }
+
+    const myForm = document.querySelector('#test-form');
+    myForm.addEventListener('submit', function() {
+        event.preventDefault();
+
+        const form = new FormData(event.target);
+        
+        const tweetText = form.get('text');
+
+        if (!tweetText || tweetText.length >= 20) return;
+        else{
+            event.target.elements['text'].value = '';
+
+            const xhr = new XMLHttpRequest();
+            xhr.responseType = 'json';
+            xhr.open('POST', event.target.action);
+            xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
+            xhr.onload = function(){
+                const response = xhr.response;
+
+                if (xhr.status === 201){
+                    const tweet = document.createElement('li');
+                    tweet.textContent = response.text;
+                    parent.prepend(tweet);
+                    progress++;
+                    console.log(xhr.statusText)
+                }
+                // also add 400 and 500 status and 401/403
+            }
+            xhr.send(form);
+        }
+    });
+
+    myForm.addEventListener('input', function(event) {
+    const inputField = event.target;
+    if (!inputField) return;
+    if (inputField.value.length >= 20){
+        inputField.style.color = 'red';
+    }
+    else{
+        inputField.style.color = 'black';
+    }
+})
 
 </script>
 {% endblock %}

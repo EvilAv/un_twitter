@@ -34,8 +34,8 @@
     </svg>
     <div class="container-fluid">
         <div class="row">
-            <nav class="col-2 navigation">
-                <ul class="sticky-top nav nav-pills flex-column vh-100 red">
+            <nav class="col-md-4 col-lg-3 col-xl-2 navigation bg-light">
+                <ul class="sticky-top nav nav-pills flex-column vh-100">
                     <li class="nav-item">
                         <h1 class="display-5">
                         <a href="{% url 'home' %}" class="text-decoration-none link-dark">K_K</a>
@@ -84,7 +84,7 @@
                 const active = document.querySelector('.active');
                 active.style.backgroundColor = '#198754';
             </script>
-            <div class="col-10 text-center">
+            <div class="col-md-8 ms-sm-auto col-lg-9 col-xl-10 text-center">
                 {% block content %}
                 {% endblock %}
             </div>
