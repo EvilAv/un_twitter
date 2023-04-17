@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.http import JsonResponse
-from .models import Test
+from .models import Test, Date_Test
 from .forms import TestForm
 
 
@@ -27,7 +27,8 @@ def test_view(request, start):
 
 
 def test_list_view(request):
-    return render(request, 'tweets/test.html')
+    data_format_test = Date_Test.objects.all()[0].test_date.strftime('%d %b %Y')
+    return render(request, 'tweets/test.html', {'date': data_format_test})
 
 
 def create_test(request):

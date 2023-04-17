@@ -15,3 +15,7 @@ class Test(models.Model):
         return {
             'text': self.text
         }
+
+
+class Date_Test(models.Model):
+    test_date = models.DateField()

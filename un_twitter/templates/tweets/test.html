@@ -2,17 +2,142 @@
 {% block title %}
 Тестовые данный
 {% endblock %}
+
+{% block page_header %}
+Тесты
+{% endblock %}
+
 {% block content %}
-<h1 class="display-5">Тесты </h1>
+{{ request.user }}
+<div class="">{{ date }}</div>
+<div class="row">
+    <div class="col-3"></div>
+        <div class="list-group col-5">
+            <textarea class="form-control"></textarea>
+            <button class="btn btn-dark">Tweet</button>
+            <hr>
+            <div id="list-of-tweets">
+                <div class="list-group-item list-group-item-action gap-3 py-3 tweet" aria-current="true">
+                    <div class="d-flex gap-2 w-100 justify-content-between">
+                      <div>
+                        <h6 class="mb-0">Penny</h6>
+                        <h6 class="mb-0 strong text-primary"><a class="text-decoration-none" href="#">@Kenny</a></h6>
+                        <p class="mb-0 opacity-75">Lorem ipsum dolor, sit amet consectetur adipisicing elit. Nostrum quae enim odit aperiam sapiente distinctio totam obcaecati voluptatum officia repellendus?</p>
+                      </div>
+                      <small class="opacity-50 text-nowrap">{{ date }}</small>
+                    </div>
+                    <hr>
+                    <div class="row row-cols-2">
+                        <div class="col">
+                          <button type="button" class="btn btn-outline-danger">
+                            <svg class="bi" width="16" height="16" fill="currentColor"><use xlink:href="#likes"/></svg> 145.7k
+                          </button>
+                        </div>
+                        <div class="col">
+                          <button type="button" class="btn btn-light" disabled>
+                            <svg class="bi" width="16" height="16" fill="currentColor"><use xlink:href="#comments"/></svg> 1.9k
+                          </button>
+                        </div>
+                    </div>
+                </div>
+    
+                <div class="list-group-item list-group-item-action gap-3 py-3 tweet" aria-current="true">
+                    <div class="d-flex gap-2 w-100 justify-content-between">
+                      <div>
+                        <h6 class="mb-0">Lenny</h6>
+                        <h6 class="mb-0 strong text-primary"><a class="text-decoration-none" href="#">@Kenny</a></h6>
+                        <p class="mb-0 opacity-75">Lorem ipsum dolor, sit amet consectetur adipisicing elit. Nostrum quae enim odit aperiam sapiente distinctio totam obcaecati voluptatum officia repellendus?</p>
+                      </div>
+                      <small class="opacity-50 text-nowrap">{{ date }}</small>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+    <div class="col-3"></div>
+</div>
 <form method="post" action="/test-create" id="test-form">
     {% csrf_token %}
     <textarea placeholder="Enter your tweet" name="text"></textarea>
     <button type="submit">Tweet</button>
 </form>
+<!--        <div class="list-group col-5">-->
+<!-- need like button, but do we need all other stuff? like comments we can show in more detail view of tweet  -->
+<!--            <div class="list-group-item-action list-group-item">-->
+<!--              <div class="d-flex gap-2 w-100 justify-content-between">-->
+<!--                <div>-->
+<!--                  <h6 class="mb-0">Lemmy </h6>-->
+<!--                  <a href="#" class="text-decoration-none"><h6 class="mb-0 strong text-primary">@Lemmy</h6></a>-->
+<!--                  <p class="mb-0 opacity-75">Эрих Цанн выпустил новый альбом!!!</p>-->
+
+<!--                </div>-->
+<!--                <small class="opacity-50 text-nowrap">01.07.2021</small>-->
+<!--              </div>-->
+<!--              <hr>-->
+<!--              <div class="row row-cols-3 ">-->
+<!--                <div class="col">-->
+<!--                  <button type="button" class="btn btn-outline-danger">-->
+<!--                    <svg class="bi" width="16" height="16"><use xlink:href="#likes"/></svg> 145.7k-->
+<!--                  </button>-->
+<!--                </div>-->
+<!--                <div class="col">-->
+<!--                  <button type="button" class="btn btn-light" disabled>-->
+<!--                    <svg class="bi" width="16" height="16"><use xlink:href="#comments"/></svg> 1.9k-->
+<!--                  </button>-->
+<!--                </div>-->
+<!--                <div class="col">-->
+<!--                  <button type="button" class="btn btn-light" disabled>-->
+<!--                    <svg class="bi" width="16" height="16"><use xlink:href="#views"/></svg> 257.9k-->
+<!--                  </button>-->
+<!--                </div>-->
+<!--              </div>-->
+<!--            </div>-->
+<!--            <hr>-->
+<!--        </div>-->
 <ul id="tweet-list">
 
 </ul>
 <script>
+
+    function generateTweet(tweetObj){
+        const tweetparent = document.querySelector('#list-of-tweets');
+        tweetContent = '<div class="list-group-item list-group-item-action gap-3 py-3 tweet" aria-current="true">'+
+                    '<div class="d-flex gap-2 w-100 justify-content-between"><div>'+
+                        '<h6 class="mb-0">'+
+                        tweetObj.nickname+'</h6>'+
+                        '<h6 class="mb-0 strong text-primary"><a class="text-decoration-none" href="'+
+                            tweetObj.authorLink+'">@'+
+                            tweetObj.author+'</a></h6>'+
+                        '<p class="mb-0 opacity-75">'+
+                            tweetObj.text+'</p></div>'+
+                      '<small class="opacity-50 text-nowrap">'+
+                        tweetObj.date+'</small></div>'+
+                      '<hr><div class="row row-cols-2"><div class="col"><button type="button" class="btn btn-outline-danger">'+
+                            '<svg class="bi" width="16" height="16" fill="currentColor"><use xlink:href="#likes"/></svg> '+
+                            tweetObj.likeCount+
+                            '</button></div><div class="col"><button type="button" class="btn btn-light" disabled>'+
+                            '<svg class="bi" width="16" height="16" fill="currentColor"><use xlink:href="#comments"/></svg> '+ 
+                            tweetObj.commentCount+
+                          '</button></div></div>';
+        const newTweet = document.createElement('div');
+        newTweet.innerHTML = tweetContent;
+        tweetparent.prepend(newTweet);
+        
+    }
+
+
+    testObj = {
+        nickname: 'UwU',
+        authorLink: '#',
+        author: 'uwu',
+        text: 'Is anyone here?',
+        date: '19 May 1986',
+        likeCount: '1.4k',
+        commentCount: '547',
+    }
+    generateTweet(testObj);
+
     const parent = document.querySelector('#tweet-list');
     let progress = 40;
     const pageHeight = document.documentElement.clientHeight;
@@ -24,13 +149,12 @@
     function isEnd(){
         
         // if we have enough time it should be rewrite with fetch cause it sends 2 responses while generate one result
-        console.log('message')
         const t = document.querySelector('.navigation');
-        console.log(t.offsetHeight);
+        // console.log(t.offsetHeight);
         const bottomLineOfHtml = document.documentElement.getBoundingClientRect().bottom;
-        console.log(bottomLineOfHtml);
-        console.log(pageHeight);
-        console.log('--------------------------------------')
+        // console.log(bottomLineOfHtml);
+        // console.log(pageHeight);
+        // console.log('--------------------------------------')
         if (bottomLineOfHtml <= pageHeight + 50){
             loadData(progress);
             progress+=40;
