@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block title %}
+Профиль {{ data.username }}
+{% endblock %}
+
+{% block page_header %}
+{{ data.username }}
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-3"></div>
+      <div class="col-5">
+          <p class="lead">
+              Имя пользователя: {{ data.nickname }}
+          </p>
+           <textarea class="form-control mb-3" disabled rows="3">
+{% if data.bio == '' or data.bio == None %}{{ data.nickname }} пока не написал о себе ни слова...
+{% else %}{{ data.bio }}{% endif %}
+           </textarea>
+          <p class="lead mb-3">
+              У {{ data.nickname }} <mark>{{ data.tweet_count }}</mark> публикаций
+          </p>
+          <p class="lead mb-3">
+              <mark>{{ data.followers }}</mark> пользователей подписаны на {{ data.nickname }}
+          </p>
+            {% if user == viewed_user %}
+            <a href="{% url 'profile-edit' user.pk %}" class="btn btn-dark" role="button">Редактировать</a>
+            {% else %}
+            <button type="button" class="btn btn-outline-dark" data-bs-toggle="button" id="follow-btn">Подписаться</button>
+            {% endif %}
+      </div>
+    <div class="col-3"></div>
+</div>
+<script>
+    const btn = document.querySelector('#follow-btn');
+    btn.addEventListener('click', function() {
+        if (btn.classList.contains('active')) {
+            btn.textContent = 'Отписаться';
+        } else {
+            btn.textContent = 'Подписаться';
+        }
+    });
+
+</script>
+
+{% endblock %}

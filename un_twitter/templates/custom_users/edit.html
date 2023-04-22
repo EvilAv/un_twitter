@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block title %}
+Редактирование профиля
+{% endblock %}
+
+{% block page_header %}
+Редактирование профиля
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-3"></div>
+      <div class="col-5">
+          <form method="post" action="">
+          {% csrf_token %}
+              <div class="mb-3">
+                <label for="name-input" class="form-label">Ваше имя</label>
+                <input class="form-control" name="nickname" id="name-input" value="{{ form.nickname.value }}">
+              </div>
+              <div class="mb-3">
+                  <label for="bio-input" class="form-label">О себе</label>
+                  <textarea class="form-control" name='bio' aria-label="With textarea" id="bio-input" rows="3" placeholder="Пара слов о себе...">{{ form.bio.value }}</textarea>
+              </div>
+              <button class="btn btn-success" type="submit">Сохранить</button>
+          </form>
+      </div>
+    <div class="col-3"></div>
+</div>
+{% endblock %}

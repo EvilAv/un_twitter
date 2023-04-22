@@ -19,3 +19,4 @@ class Test(models.Model):
 
 class Date_Test(models.Model):
     test_date = models.DateField()
+    smth = models.CharField(max_length=5, null=True)
