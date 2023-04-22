@@ -8,4 +8,6 @@ urlpatterns = [
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
     path('user/<int:pk>/edit', views.UserUpdateView.as_view(), name='profile-edit'),
     path('user/<int:pk>/profile', views.profile_view, name='profile'),
+    path('user/<int:pk>/follow', views.add_follow, name='add-follow'),
+    path('user/<int:pk>/unfollow', views.delete_follow, name='delete-follow'),
 ]

@@ -1,8 +1,10 @@
 from django.shortcuts import render, redirect, reverse
 from django.contrib.auth import login as auth_login
-from .forms import SignUpForm, CustomUserChangeForm
+from .forms import SignUpForm, CustomUserChangeForm #FollowerForm
 from django.views import generic
-from .models import CustomUser
+from .models import CustomUser, Followers
+from django.http import JsonResponse
+import json
 
 
 # Create your views here.
@@ -32,6 +34,38 @@ class UserUpdateView(generic.UpdateView):
 
 
 def profile_view(request, pk):
-    user = CustomUser.objects.get(pk=pk)
-    data = user.serialize()
-    return render(request, 'custom_users/profile_view.html', {'data': data, 'viewed_user': user})
+    viewed_user = CustomUser.objects.get(pk=pk)
+
+    if Followers.objects.filter(the_one_who_follow=request.user, follow_target=viewed_user):
+        is_follower = True
+    else:
+        is_follower = False
+
+    data = viewed_user.serialize()
+
+    return render(request, 'custom_users/profile_view.html',
+                  {'data': data, 'viewed_user': viewed_user, 'is_follower': is_follower})
+
+
+def add_follow(request, pk):
+    if request.method == 'POST':
+        follow = Followers(the_one_who_follow=request.user,follow_target=CustomUser.objects.get(pk=pk))
+        is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+        follow.clean()
+        follow.save()
+        if is_ajax:
+            # json_data = json.loads(request.body)
+            return JsonResponse({}, status=200)
+
+    return render(request, 'tweets/index.html')
+
+
+def delete_follow(request, pk):
+    if request.method == 'POST':
+        Followers.objects.filter(the_one_who_follow=request.user,follow_target=CustomUser.objects.get(pk=pk)).delete()
+        is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+        if is_ajax:
+            # json_data = json.loads(request.body)
+            return JsonResponse({}, status=200)
+
+    return render(request, 'tweets/index.html')
