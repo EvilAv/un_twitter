@@ -69,3 +69,8 @@ def delete_follow(request, pk):
             return JsonResponse({}, status=200)
 
     return render(request, 'tweets/index.html')
+
+
+def show_follows(request):
+    list_of_follows = Followers.objects.filter(the_one_who_follow=request.user)
+    return render(request, 'custom_users/list_of_follows.html', {'list': list_of_follows})

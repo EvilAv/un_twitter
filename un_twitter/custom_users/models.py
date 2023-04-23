@@ -45,3 +45,6 @@ class Followers(models.Model):
 
     def __str__(self):
         return str(self.the_one_who_follow) + ' -> ' + str(self.follow_target)
+
+    def get_absolute_url(self):
+        pass

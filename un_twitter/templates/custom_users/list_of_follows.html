@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% block title %}
+Подписки {{ user }}
+{% endblock %}
+
+{% block page_header %}
+Подписки {{ user }}
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-2"></div>
+<div class="col-8">
+    {% for item in list %}
+    <div class="mt-3">
+        <p class="d-flex justify-content-around">
+            <em class="lead"><strong>{{ item.follow_target.nickname }}</strong></em> <span class="lead">{{ item.follow_target }}</span>
+            <a href="{{ item.follow_target.get_absolute_url }}">Подробнее</a>
+<!--            <button class="btn btn-outline-danger">Отписаться</button>-->
+        </p>
+
+        <hr>
+    </div>
+    {% endfor %}
+</div>
+<div class="col-2"></div>
+</div>
+{% endblock %}
+
+{% block sidebar_buttons %}
+<li class="nav-item">
+    <a href="#" class="nav-link link-dark" aria-current="page">
+      <svg class="bi me-2" width="16" height="16" fill="currentColor"><use xlink:href="#news"/></svg>
+      <strong>Новости</strong>
+    </a>
+</li>
+<li class="nav-item">
+    <a href="#" class="nav-link link-dark" aria-current="page">
+      <svg class="bi me-2" width="16" height="16"><use xlink:href="#chats"/></svg>
+        <strong>Диалоги</strong> <span class="badge text-bg-dark">4</span>
+    </a>
+</li>
+<li class="nav-item">
+    <a href="{% url 'list-of-follows' %}" class="nav-link link-light active bg-success" aria-current="page">
+        <svg class="bi me-2" width="16" height="16" fill="currentColor"><use xlink:href="#subs"/></svg>
+      <strong>Подписки</strong>
+    </a>
+</li>
+{% endblock %}
