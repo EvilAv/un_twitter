@@ -19,10 +19,10 @@
 {% else %}{{ data.bio }}{% endif %}
            </textarea>
           <p class="lead mb-3">
-              У {{ data.nickname }} <mark>{{ data.tweet_count }}</mark> публикаций <a href="#" class="btn btn-outline-dark" role="button">Посмотреть</a>
+              У {% if user == viewed_user %}Вас{% else %}{{ data.nickname }}{% endif %} <mark>{{ data.tweet_count }}</mark> публикаций <a href="{% url 'tweet-list' viewed_user.pk %}" class="btn btn-outline-dark" role="button">Посмотреть</a>
           </p>
           <p class="lead mb-3">
-              <mark id="followers-count">{{ data.followers }}</mark> пользователей подписаны на {{ data.nickname }}
+              <mark id="followers-count">{{ data.followers }}</mark> пользователей подписаны на {% if user == viewed_user %}Вас{% else %}{{ data.nickname }}{% endif %}
           </p>
             {% if user == viewed_user %}
             <a href="{% url 'profile-edit' user.pk %}" class="btn btn-dark" role="button">Редактировать</a>
@@ -56,10 +56,9 @@ function getCookie(name) {
 
 
     const btn = document.querySelector('#follow-btn');
-    console.log('{{ user.pk }}')
+
     const followers = document.querySelector('#followers-count');
-    console.log("{% url 'add-follow' viewed_user.pk %}")
-    console.log('{{ csrf_token }}')
+
     const errorMsg = document.createElement('p');
     errorMsg.classList.add('text-danger');
     errorMsg.classList.add('mt-2');
@@ -137,6 +136,12 @@ function getCookie(name) {
     <a href="#" class="nav-link link-dark" aria-current="page">
       <svg class="bi me-2" width="16" height="16" fill="currentColor"><use xlink:href="#news"/></svg>
       <strong>Новости</strong>
+    </a>
+</li>
+<li class="nav-item">
+    <a href="{% url 'tweet-list' user.pk %}" class="nav-link link-dark" aria-current="page">
+        <svg class="bi me-2" width="16" height="16"><use xlink:href="#my-tweet"/></svg>
+      <strong>Мои твиты</strong>
     </a>
 </li>
 <li class="nav-item">

@@ -1,0 +1,197 @@
+{% extends 'base.html' %}
+{% block title %}
+Твиты {{ viewed_user.nickname }}
+{% endblock %}
+
+{% block page_header %}
+Твиты {{ viewed_user.nickname }}
+{% endblock %}
+
+{% block content %}
+<div class="row mt-3">
+    <div class="col-3"></div>
+        <div class="list-group col-5">
+            {% if user == viewed_user %}
+            <form action="{% url 'tweet-create' %}" method="post" id="tweet-creator">
+                {% csrf_token %}
+                <textarea class="form-control" name="text"></textarea>
+                <div class="d-grid">
+                    <button class="btn btn-dark" type="submit">Tweet</button>
+                </div>
+            </form>
+            <hr>
+            {% endif %}
+            <div id="list-of-tweets">
+            </div>
+        </div>
+    <div class="col-3"></div>
+</div>
+<script>
+
+    function generateTweet(tweetObj, place){
+        const tweetparent = document.querySelector('#list-of-tweets');
+        tweetContent = '<div class="list-group-item list-group-item-action gap-3 py-3 tweet" aria-current="true">'+
+                    '<div class="d-flex gap-2 w-100 justify-content-between"><div>'+
+                        '<h6 class="mb-0">'+
+                        tweetObj.nickname+'</h6>'+
+                        '<h6 class="mb-0 strong text-primary"><a class="text-decoration-none" href="'+
+                            tweetObj.authorLink+'">'+
+                            tweetObj.author+'</a></h6>'+
+                        '<p class="mb-0 opacity-75 text-break">'+
+                            tweetObj.text+'</p></div><div>'+
+                      '<p class="mb-0"><small class="opacity-50 text-nowrap">'+
+                        tweetObj.date+'</p></small>'+
+                        '<p class="mb-0"><small class="opacity-50 text-nowrap">'+
+                        tweetObj.time+'</p></small></div></div>'+
+                      '<hr><div class="row row-cols-2"><div class="col"><button type="button" class="btn btn-outline-danger">'+
+                            '<svg class="bi" width="16" height="16" fill="currentColor"><use xlink:href="#likes"/></svg> '+
+                            tweetObj.likeCount+
+                            '</button></div><div class="col"><button type="button" class="btn btn-light" disabled>'+
+                            '<svg class="bi" width="16" height="16" fill="currentColor"><use xlink:href="#comments"/></svg> '+ 
+                            tweetObj.commentCount+
+                          '</button></div></div>';
+        const newTweet = document.createElement('div');
+        newTweet.innerHTML = tweetContent;
+        if (place === 'before'){
+            tweetparent.prepend(newTweet);
+        } else {
+            tweetparent.append(newTweet);
+        }
+            
+        
+    }
+
+
+    // testObj = {
+    //     nickname: 'UwU',
+    //     authorLink: '#',
+    //     author: 'uwu',
+    //     text: 'Is anyone here?',
+    //     date: '19 May 1986',
+    //     likeCount: '1.4k',
+    //     commentCount: '547',
+    // }
+    // generateTweet(testObj);
+    const parent = document.querySelector('#list-of-tweets');
+    let progress = 10;
+    const pageHeight = document.documentElement.clientHeight;
+
+    loadData(0);
+
+    window.addEventListener('scroll', isEnd);
+
+    function isEnd(){
+        
+        // if we have enough time it should be rewrite with fetch cause it sends 2 responses while generate one result
+        const t = document.querySelector('.navigation');
+        // console.log(t.offsetHeight);
+        const bottomLineOfHtml = document.documentElement.getBoundingClientRect().bottom;
+        // console.log(bottomLineOfHtml);
+        // console.log(pageHeight);
+        // console.log('--------------------------------------')
+        if (bottomLineOfHtml <= pageHeight + 50){
+            loadData(progress);
+            progress+=10;
+        }
+    }
+
+    function loadData(progress){
+        const xhr = new XMLHttpRequest();
+        xhr.responseType = 'json';
+        // <int:pk>/get/tweets/<int:start>
+        let url = '/{{ viewed_user.pk }}/get/tweets/'+progress;
+        xhr.open('GET', url);
+        xhr.onload = function(){
+            result = xhr.response;
+            if (result.data){
+                for (let item of result.data){
+                    generateTweet(item, 'after');
+                }
+            }
+        }
+        xhr.send();
+    }
+
+    const myForm = document.querySelector('#tweet-creator');
+    myForm.addEventListener('submit', function() {
+        event.preventDefault();
+
+        const form = new FormData(event.target);
+        console.log(event.target)
+
+        console.log(form)
+        
+        const tweetText = form.get('text');
+        console.log(tweetText)
+
+        if (!tweetText || tweetText.length >= 255) return;
+        else{
+            event.target.elements['text'].value = '';
+
+            const xhr = new XMLHttpRequest();
+            xhr.responseType = 'json';
+            xhr.open('POST', event.target.action);
+            xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
+            xhr.onload = function(){
+                const response = xhr.response;
+
+                if (xhr.status === 201){
+                    generateTweet(response, 'before')
+                    progress++;
+                    console.log(xhr.statusText)
+                }
+                // also add 400 and 500 status and 401/403
+            }
+            xhr.send(form);
+        }
+    });
+
+    myForm.addEventListener('input', function(event) {
+    const inputField = event.target;
+    if (!inputField) return;
+    if (inputField.value.length >= 255){
+        inputField.style.color = 'red';
+    }
+    else{
+        inputField.style.color = 'black';
+    }
+})
+
+</script>
+{% endblock %}
+
+{% block sidebar_buttons %}
+<li class="nav-item">
+    <a href="#" class="nav-link link-dark" aria-current="page">
+      <svg class="bi me-2" width="16" height="16" fill="currentColor"><use xlink:href="#news"/></svg>
+      <strong>Новости</strong>
+    </a>
+</li>
+{% if user == viewed_user %}
+<li class="nav-item">
+    <a href="{% url 'tweet-list' user.pk %}" class="nav-link link-light active bg-success" aria-current="page">
+        <svg class="bi me-2" width="16" height="16" fill="currentColor"><use xlink:href="#my-tweet"/></svg>
+      <strong>Мои твиты</strong>
+    </a>
+</li>
+{% else %}
+<li class="nav-item">
+    <a href="{% url 'tweet-list' user.pk %}" class="nav-link link-dark" aria-current="page">
+        <svg class="bi me-2" width="16" height="16" fill="currentColor"><use xlink:href="#my-tweet"/></svg>
+      <strong>Мои твиты</strong>
+    </a>
+</li>
+{% endif %}
+<li class="nav-item">
+    <a href="#" class="nav-link link-dark" aria-current="page">
+      <svg class="bi me-2" width="16" height="16"><use xlink:href="#chats"/></svg>
+        <strong>Диалоги</strong> <span class="badge text-bg-dark">4</span>
+    </a>
+</li>
+<li class="nav-item">
+    <a href="{% url 'list-of-follows' %}" class="nav-link link-dark" aria-current="page">
+        <svg class="bi me-2" width="16" height="16"><use xlink:href="#subs"/></svg>
+      <strong>Подписки</strong>
+    </a>
+</li>
+{% endblock %}

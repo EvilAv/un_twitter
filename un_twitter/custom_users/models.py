@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.urls import reverse
 from django.core.exceptions import ValidationError
+from tweets.models import Tweet
 
 
 # Create your models here.
@@ -20,7 +21,7 @@ class CustomUser(AbstractUser):
             'username': self.__str__(),
             'nickname': self.nickname,
             'bio': self.bio,
-            'tweet_count': 0,
+            'tweet_count': Tweet.objects.filter(author=self).count(),
             'followers': Followers.objects.filter(follow_target=self).count(),
         }
 
