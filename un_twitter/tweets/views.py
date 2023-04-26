@@ -1,8 +1,8 @@
 import datetime
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404, redirect, reverse
 from django.http import JsonResponse
-from .models import Test, Tweet
-from .forms import TestForm, TweetForm
+from .models import Test, Tweet, Comment
+from .forms import TestForm, TweetForm, CommentForm
 from custom_users.models import CustomUser
 from django.utils import timezone
 
@@ -77,7 +77,6 @@ def get_tweets(request, start, pk):
     data = {
         'data': json_list,
     }
-    print(data)
     return JsonResponse(data)
 
 
@@ -94,11 +93,34 @@ def create_tweet(request):
             raw_tweet.comment_count = 0
             raw_tweet.save()
             if is_ajax:
-                print(raw_tweet.serialize())
                 return JsonResponse(raw_tweet.serialize(), status=201)
         if form.errors:
             if is_ajax:
                 return JsonResponse(form.errors, status=400)
 
-    else:
-        form = TestForm()
+
+def detail_tweet(request, pk):
+    tweet = get_object_or_404(Tweet, pk=pk)
+    comments = Comment.objects.filter(parent=tweet)
+    return render(request, 'tweets/tweet-detail.html', {'tweet': tweet, 'comments': comments})
+
+
+def add_comment(request, pk):
+    tweet = get_object_or_404(Tweet, pk=pk)
+    if request.method == 'POST':
+        form = CommentForm(request.POST)
+
+        if form.is_valid():
+            raw_comment = form.save(commit=False)
+            raw_comment.author = request.user
+            raw_comment.date = timezone.localtime(timezone.now())
+            raw_comment.parent = tweet
+            raw_comment.save()
+    return redirect(reverse('tweet-detail', args=[str(pk)]))
+
+
+def delete_comment(request, pk, comId):
+    comment = get_object_or_404(Comment, pk=comId)
+    if request.user == comment.author:
+        comment.delete()
+    return redirect(reverse('tweet-detail', args=[str(pk)]))

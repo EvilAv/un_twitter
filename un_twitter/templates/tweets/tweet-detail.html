@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+{% block title %}
+Твит {{ tweet.author.nickname }}
+{% endblock %}
+
+{% block page_header %}
+Твит {{ tweet.author.nickname }} от {{ tweet.get_date }}
+{% endblock %}
+
+{% block content %}
+<div class="row mt-3">
+    <div class="col-3"></div>
+        <div class="list-group col-5">
+            <div id="list-of-tweets">
+                <div class="list-group-item list-group-item-action gap-3 py-3 tweet" aria-current="true">
+                    <div class="d-flex gap-2 w-100 justify-content-between" data-id="18">
+                        <div>
+                            <h6 class="mb-0">{{ tweet.author.nickname }}</h6>
+                            <h6 class="mb-0 strong text-primary">
+                                <a class="text-decoration-none" href="{{ tweet.author.get_absolute_url }}">{{ tweet.author }}</a>
+                            </h6>
+                            <p class="mb-0 opacity-75 text-break">{{ tweet.text }}</p>
+                        </div>
+                        <div>
+                            <p class="mb-0">
+                                <small class="opacity-50 text-nowrap">{{ tweet.get_date }}</small>
+                            </p>
+                            <p class="mb-0">
+                                <small class="opacity-50 text-nowrap">{{ tweet.get_time }}</small>
+                            </p>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row row-cols-2">
+                        <div class="col">
+                            <button type="button" class="btn btn-outline-danger">
+                                <svg class="bi" width="16" height="16" fill="currentColor"><use xlink:href="#likes"/></svg>
+                                {{ tweet.likeCount }}
+                            </button>
+                        </div>
+                        <div class="col">
+                            <a role="button" href="{{ tweet.get_absolute_url }}" class="btn btn-light">
+                                <svg class="bi" width="16" height="16" fill="currentColor"><use xlink:href="#comments"/></svg>
+                                {{ tweet.commentCount }}
+                            </a>
+                        </div>
+                </div>
+            </div>
+            <hr>
+
+            <div class="row">
+              <div class="col-2"></div>
+              <div class="list-group col-8">
+                  <form action="{{ tweet.get_comment_link }}" method="post" id="comment-creator">
+                    {% csrf_token %}
+                    <textarea class="form-control" name="text"></textarea>
+                    <div class="d-grid">
+                        <button class="btn btn-dark" type="submit">Прокомментировать</button>
+                    </div>
+                    </form>
+                <hr>
+                  {% if not comments %}
+                  <p class="lead">Здесь пока ничего нет, добавьте комментарий первым</p>
+                  {% endif %}
+                  {% for comment in comments %}
+                  <div class="list-group-item list-group-item-action d-flex gap-3 py-3" aria-current="true">
+                      <div class="d-flex gap-2 w-100 justify-content-between">
+                        <div>
+                            <h6 class="mb-0">{{ comment.author.nickname }}</h6>
+                            <h6 class="mb-0 strong text-primary">
+                                <a class="text-decoration-none" href="{{ comment.author.get_absolute_url }}">{{ comment.author }}</a>
+                            </h6>
+                          <p class="mb-0 opacity-75 text-break">{{ comment.text }}</p>
+                        </div>
+                        <div>
+                                <p class="mb-0">
+                                    <small class="opacity-50 text-nowrap">{{ comment.get_date }}</small>
+                                </p>
+                                <p class="mb-0">
+                                    <small class="opacity-50 text-nowrap">{{ comment.get_time }}</small>
+                                </p>
+                                {% if comment.author == user %}
+                              <form method="post" action="{{ comment.get_delete_link }}">
+                                  {% csrf_token %}
+                                  <div>
+                                      <abbr class="text-decoration-none" title="Удалить">
+                                          <a href="{{ comment.get_delete_link }}" class="link-danger text-decoration-none" onclick="this.closest('form').submit(); return false;">
+                                            <strong>Х</strong>
+                                        </a>
+                                      </abbr>
+                                </div>
+                              </form>
+                              {% endif %}
+                        </div>
+                      </div>
+                    </div>
+                  {% endfor %}
+                </div>
+                <div class="col-2"></div>
+            </div>
+        </div>
+    <div class="col-3"></div>
+</div>
+{% endblock %}
+
+{% block sidebar_buttons %}
+{% if user.is_authenticated %}
+<li class="nav-item">
+    <a href="#" class="nav-link link-dark" aria-current="page">
+      <svg class="bi me-2" width="16" height="16" fill="currentColor"><use xlink:href="#news"/></svg>
+      <strong>Новости</strong>
+    </a>
+</li>
+<li class="nav-item">
+    <a href="{% url 'tweet-list' user.pk %}" class="nav-link link-dark" aria-current="page">
+        <svg class="bi me-2" width="16" height="16"><use xlink:href="#my-tweet"/></svg>
+      <strong>Мои твиты</strong>
+    </a>
+</li>
+<li class="nav-item">
+    <a href="#" class="nav-link link-dark" aria-current="page">
+      <svg class="bi me-2" width="16" height="16"><use xlink:href="#chats"/></svg>
+        <strong>Диалоги</strong> <span class="badge text-bg-dark">4</span>
+    </a>
+</li>
+<li class="nav-item">
+    <a href="{% url 'list-of-follows' %}" class="nav-link link-dark" aria-current="page">
+        <svg class="bi me-2" width="16" height="16"><use xlink:href="#subs"/></svg>
+      <strong>Подписки</strong>
+    </a>
+</li>
+{% endif %}
+{% endblock %}

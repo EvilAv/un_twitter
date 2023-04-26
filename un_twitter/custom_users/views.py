@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect, reverse
+from django.shortcuts import render, redirect, get_object_or_404, reverse
 from django.contrib.auth import login as auth_login
 from .forms import SignUpForm, CustomUserChangeForm #FollowerForm
 from django.views import generic
@@ -34,7 +34,7 @@ class UserUpdateView(generic.UpdateView):
 
 
 def profile_view(request, pk):
-    viewed_user = CustomUser.objects.get(pk=pk)
+    viewed_user = get_object_or_404(CustomUser, pk=pk)
 
     if Followers.objects.filter(the_one_who_follow=request.user, follow_target=viewed_user):
         is_follower = True

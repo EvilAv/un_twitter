@@ -1,6 +1,8 @@
 from django.db import models
 import datetime
-from django.utils import timezone, dateformat
+from django.utils import timezone
+from django.urls import reverse
+
 
 # Create your models here.
 class Test(models.Model):
@@ -23,7 +25,7 @@ class Test(models.Model):
 class Tweet(models.Model):
     author = models.ForeignKey('custom_users.CustomUser', on_delete=models.CASCADE)
     text = models.CharField(max_length=255)
-    date = models.DateTimeField(default=timezone.now())
+    date = models.DateTimeField(default=timezone.now)
     like_count = models.IntegerField(default=0)
     comment_count = models.IntegerField(default=0)
     # 'date': dateformat.format(self.date, 'd N Y'),
@@ -39,7 +41,40 @@ class Tweet(models.Model):
             'time': timezone.localtime(self.date).strftime('%H:%M'),
             'likeCount': integer_format(self.like_count),
             'commentCount': integer_format(self.comment_count),
+            'tweetLink': self.get_absolute_url()
         }
+
+    class Meta:
+        ordering = ['-date']
+
+    def get_comment_link(self):
+        return reverse('add-comment', args=[str(self.pk)])
+
+    def get_absolute_url(self):
+        return reverse('tweet-detail', args=[str(self.pk)])
+
+    def get_date(self):
+        return timezone.localtime(self.date).strftime('%d %b %Y')
+
+    def get_time(self):
+        return timezone.localtime(self.date).strftime('%H:%M')
+
+
+class Comment(models.Model):
+    parent = models.ForeignKey(Tweet, on_delete=models.CASCADE)
+    author = models.ForeignKey('custom_users.CustomUser', on_delete=models.CASCADE)
+    text = models.CharField(max_length=255)
+    date = models.DateTimeField(default=timezone.now)
+
+    def get_date(self):
+        return timezone.localtime(self.date).strftime('%d %b %Y')
+
+    def get_time(self):
+        return timezone.localtime(self.date).strftime('%H:%M')
+
+    def get_delete_link(self):
+        return reverse('delete-comment', args=[str(self.parent.pk), str(self.pk)])
+    # or use kwargs
 
     class Meta:
         ordering = ['-date']
