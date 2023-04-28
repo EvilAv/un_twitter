@@ -41,7 +41,7 @@
                         <div class="col">
                             <a role="button" href="{{ tweet.get_absolute_url }}" class="btn btn-light">
                                 <svg class="bi" width="16" height="16" fill="currentColor"><use xlink:href="#comments"/></svg>
-                                {{ tweet.commentCount }}
+                                {{ tweet.get_comment_count }}
                             </a>
                         </div>
                 </div>
@@ -84,7 +84,8 @@
                                   {% csrf_token %}
                                   <div>
                                       <abbr class="text-decoration-none" title="Удалить">
-                                          <a href="{{ comment.get_delete_link }}" class="link-danger text-decoration-none" onclick="this.closest('form').submit(); return false;">
+                                          <a href="{{ comment.get_delete_link }}" class="link-danger text-decoration-none"
+                                             onclick="if (confirm('Вы действительно хотите удалить комментарий?')) { this.closest('form').submit(); } return false;">
                                             <strong>Х</strong>
                                         </a>
                                       </abbr>
@@ -121,6 +122,12 @@
     <a href="#" class="nav-link link-dark" aria-current="page">
       <svg class="bi me-2" width="16" height="16"><use xlink:href="#chats"/></svg>
         <strong>Диалоги</strong> <span class="badge text-bg-dark">4</span>
+    </a>
+</li>
+    <li class="nav-item">
+    <a href="{% url 'main-search' %}" class="nav-link link-dark" aria-current="page">
+        <svg class="bi me-2" width="16" height="16"><use xlink:href="#search"/></svg>
+      <strong>Поиск</strong>
     </a>
 </li>
 <li class="nav-item">

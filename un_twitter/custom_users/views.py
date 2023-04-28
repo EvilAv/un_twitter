@@ -5,6 +5,8 @@ from django.views import generic
 from .models import CustomUser, Followers
 from django.http import JsonResponse
 import json
+from django.views.generic import ListView
+from django.db.models import Q
 
 
 # Create your views here.
@@ -74,3 +76,21 @@ def delete_follow(request, pk):
 def show_follows(request):
     list_of_follows = Followers.objects.filter(the_one_who_follow=request.user)
     return render(request, 'custom_users/list_of_follows.html', {'list': list_of_follows})
+
+
+def main_search(request):
+    return render(request, 'custom_users/main_search.html')
+
+
+class SearchView(ListView):
+    model = CustomUser
+    template_name = 'custom_users/search_results.html'
+    context_object_name = 'results'
+
+    def get_queryset(self):
+        query = self.request.GET.get("q")
+        if not query:
+            return CustomUser.objects.none()
+        return CustomUser.objects.filter(
+            Q(main_name__icontains=query) | Q(nickname__icontains=query)
+        )

@@ -37,10 +37,10 @@ class Tweet(models.Model):
             'authorLink': self.author.get_absolute_url(),
             'author': str(self.author),
             'text': self.text,
-            'date': timezone.localtime(self.date).strftime('%d %b %Y'),
-            'time': timezone.localtime(self.date).strftime('%H:%M'),
+            'date': self.get_date(),
+            'time': self.get_time(),
             'likeCount': integer_format(self.like_count),
-            'commentCount': integer_format(self.comment_count),
+            'commentCount': self.get_comment_count(),
             'tweetLink': self.get_absolute_url()
         }
 
@@ -59,6 +59,9 @@ class Tweet(models.Model):
     def get_time(self):
         return timezone.localtime(self.date).strftime('%H:%M')
 
+    def get_comment_count(self):
+        return integer_format(self.comment_count)
+
 
 class Comment(models.Model):
     parent = models.ForeignKey(Tweet, on_delete=models.CASCADE)
@@ -76,6 +79,16 @@ class Comment(models.Model):
         return reverse('delete-comment', args=[str(self.parent.pk), str(self.pk)])
     # or use kwargs
 
+    def save(self, *args, **kwargs):
+        self.parent.comment_count += 1
+        self.parent.save()
+        super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        self.parent.comment_count -= 1
+        self.parent.save()
+        super().delete(*args, **kwargs)
+
     class Meta:
         ordering = ['-date']
 
@@ -83,5 +96,19 @@ class Comment(models.Model):
 def integer_format(integer):
     if integer == 0:
         return ''
+    elif integer + 50 >= 1000 and integer + 50000 < 1000000:
+        integer += 50
+        integer = integer // 100
+        if integer % 10 == 0 or integer >= 1000:
+            return str(integer // 10) + 'k'
+        else:
+            return str(integer / 10) + 'k'
+    elif integer + 50000 >= 1000000:
+        integer += 50000
+        integer = integer // 100000
+        if integer % 10 == 0:
+            return str(integer // 10) + 'M'
+        else:
+            return str(integer / 10) + 'M'
     else:
         return str(integer)

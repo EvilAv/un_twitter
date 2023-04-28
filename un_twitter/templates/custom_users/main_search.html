@@ -1,20 +1,31 @@
 {% extends 'base.html' %}
 {% block title %}
-
+Поиск
 {% endblock %}
 
 {% block page_header %}
-Домашняя страница
+Поиск
 {% endblock %}
 
 {% block content %}
-ЫЫЫЫ
+<div class="row mt-3">
+    <div class="col-2"></div>
+        <div class="list-group col-8">
+            <form action="{% url 'search' %}" method="get">
+                <div class="input-group mb-3">
+                    <input type="text" class="form-control" placeholder="Пользователи" name="q" aria-describedby="button-addon2">
+                    <button class="btn btn-dark" type="submit" id="button-addon2">Поиск</button>
+                </div>
+            </form>
+        </div>
+    <div class="col-2"></div>
+</div>
 {% endblock %}
 
 {% block sidebar_buttons %}
 {% if user.is_authenticated %}
 <li class="nav-item">
-    <a href="#" class="nav-link link-light active bg-success" aria-current="page">
+    <a href="#" class="nav-link link-dark" aria-current="page">
       <svg class="bi me-2" width="16" height="16" fill="currentColor"><use xlink:href="#news"/></svg>
       <strong>Новости</strong>
     </a>
@@ -32,8 +43,8 @@
     </a>
 </li>
 <li class="nav-item">
-    <a href="{% url 'main-search' %}" class="nav-link link-dark" aria-current="page">
-        <svg class="bi me-2" width="16" height="16"><use xlink:href="#search"/></svg>
+    <a href="{% url 'main-search' %}" class="nav-link link-light active bg-success" aria-current="page">
+        <svg class="bi me-2" width="16" height="16" fill="currentColor"><use xlink:href="#search"/></svg>
       <strong>Поиск</strong>
     </a>
 </li>

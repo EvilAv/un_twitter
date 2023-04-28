@@ -11,6 +11,14 @@
 <div class="row">
     <div class="col-2"></div>
 <div class="col-8">
+    {% if not list %}
+    <div class="text-center mt-2">
+        <h6 class="display-6">:(</h6>
+        <p class="lead mb-0">Здесь пока ничего нет</p>
+        <p class="lead">Найдите и подпишитесь на интересных людей</p>
+        <a href="{% url 'main-search' %}" class="btn btn-outline-secondary" role="button">Найти</a>
+    </div>
+    {% endif %}
     {% for item in list %}
     <div class="mt-3">
         <p class="d-flex justify-content-around">
@@ -44,6 +52,12 @@
     <a href="#" class="nav-link link-dark" aria-current="page">
       <svg class="bi me-2" width="16" height="16"><use xlink:href="#chats"/></svg>
         <strong>Диалоги</strong> <span class="badge text-bg-dark">4</span>
+    </a>
+</li>
+<li class="nav-item">
+    <a href="{% url 'main-search' %}" class="nav-link link-dark" aria-current="page">
+        <svg class="bi me-2" width="16" height="16"><use xlink:href="#search"/></svg>
+      <strong>Поиск</strong>
     </a>
 </li>
 <li class="nav-item">
