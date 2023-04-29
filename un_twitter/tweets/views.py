@@ -93,7 +93,7 @@ def create_tweet(request):
             raw_tweet.comment_count = 0
             raw_tweet.save()
             if is_ajax:
-                return JsonResponse(raw_tweet.serialize(), status=201)
+                return JsonResponse(raw_tweet.serialize(request.user), status=201)
         if form.errors:
             if is_ajax:
                 return JsonResponse(form.errors, status=400)
@@ -145,3 +145,13 @@ def handle_rate(request, pk):
             # maube it should be id of rate in json response, so it will be easier and faster to delete rate
             likes = tweet.get_like_count()
             return JsonResponse({'result': 'delete', 'likes': likes}, status=200)
+
+
+def delete_tweet(request, pk):
+    tweet = get_object_or_404(Tweet, pk=pk)
+    user = request.user
+    print(user)
+    if tweet.author == user:
+        print('aaa')
+        tweet.delete()
+    return redirect(reverse('tweet-list', args=[str(user.pk)]))

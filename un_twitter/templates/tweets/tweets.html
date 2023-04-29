@@ -58,7 +58,7 @@ function generateTweet(tweetObj, place){
                     '<h6 class="mb-0 strong text-primary"><a class="text-decoration-none" href="'+
                         tweetObj.authorLink+'">'+
                         tweetObj.author+'</a></h6>'+
-                    '<p class="mb-0 opacity-75 text-break" style="white-space: pre-line">'+
+                    '<p class="mb-0 opacity-75 text-break" style="white-space: pre-line;">'+
                         tweetObj.text+'</p></div><div>'+
                     '<p class="mb-0"><small class="opacity-50 text-nowrap">'+
                     tweetObj.date+'</small></p>'+
@@ -217,7 +217,8 @@ function generateTweet(tweetObj, place){
                 if (xhr.status === 201){
                     generateTweet(response, 'before')
                     progress++;
-                    document.querySelector('#empty-tweets').remove()
+                    let tmp = document.querySelector('#empty-tweets');
+                    if (tmp) {tmp.remove()}
                     console.log(xhr.statusText)
                 }
                 // also add 400 and 500 status and 401/403

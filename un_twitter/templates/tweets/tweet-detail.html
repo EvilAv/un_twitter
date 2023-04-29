@@ -28,6 +28,19 @@
                             <p class="mb-0">
                                 <small class="opacity-50 text-nowrap">{{ tweet.get_time }}</small>
                             </p>
+                            {% if tweet.author == user %}
+                            <form method="post" action="{{ tweet.get_delete_link }}">
+                                  {% csrf_token %}
+                                  <div>
+                                      <abbr class="text-decoration-none" title="Удалить">
+                                          <a href="#" class="link-danger text-decoration-none"
+                                             onclick="if (confirm('Вы действительно хотите удалить этот твит?')) { this.closest('form').submit(); } return false;">
+                                            <strong>Х</strong>
+                                        </a>
+                                      </abbr>
+                                </div>
+                              </form>
+                            {% endif %}
                         </div>
                     </div>
                     <hr>
@@ -88,7 +101,7 @@
                                   {% csrf_token %}
                                   <div>
                                       <abbr class="text-decoration-none" title="Удалить">
-                                          <a href="{{ comment.get_delete_link }}" class="link-danger text-decoration-none"
+                                          <a href="#" class="link-danger text-decoration-none"
                                              onclick="if (confirm('Вы действительно хотите удалить комментарий?')) { this.closest('form').submit(); } return false;">
                                             <strong>Х</strong>
                                         </a>

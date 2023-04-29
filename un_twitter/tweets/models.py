@@ -42,7 +42,7 @@ class Test(models.Model):
 
 class Tweet(models.Model):
     author = models.ForeignKey('custom_users.CustomUser', on_delete=models.CASCADE)
-    text = models.CharField(max_length=255)
+    text = models.TextField(max_length=255)
     date = models.DateTimeField(default=timezone.now)
     like_count = models.IntegerField(default=0)
     comment_count = models.IntegerField(default=0)
@@ -91,11 +91,14 @@ class Tweet(models.Model):
             return True
         return False
 
+    def get_delete_link(self):
+        return reverse('delete-tweet', args=[str(self.pk)])
+
 
 class Comment(models.Model):
     parent = models.ForeignKey(Tweet, on_delete=models.CASCADE)
     author = models.ForeignKey('custom_users.CustomUser', on_delete=models.CASCADE)
-    text = models.CharField(max_length=255)
+    text = models.TextField(max_length=255)
     date = models.DateTimeField(default=timezone.now)
 
     def get_date(self):
