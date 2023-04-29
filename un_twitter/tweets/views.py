@@ -1,7 +1,7 @@
 import datetime
 from django.shortcuts import render, get_object_or_404, redirect, reverse
 from django.http import JsonResponse
-from .models import Test, Tweet, Comment
+from .models import Test, Tweet, Comment, Rate
 from .forms import TestForm, TweetForm, CommentForm
 from custom_users.models import CustomUser
 from django.utils import timezone
@@ -73,7 +73,7 @@ def get_tweets(request, start, pk):
     else:
         end = start + 10
     tweets_list = tweets[start:end]
-    json_list = [i.serialize() for i in tweets_list]
+    json_list = [i.serialize(request.user) for i in tweets_list]
     data = {
         'data': json_list,
     }
@@ -124,3 +124,24 @@ def delete_comment(request, pk, comId):
     if request.user == comment.author:
         comment.delete()
     return redirect(reverse('tweet-detail', args=[str(pk)]))
+
+
+def add_rate(request, pk):
+    is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+
+    tweet = get_object_or_404(Tweet, pk=pk)
+    if is_ajax:
+        if request.method == 'POST':
+            new_rate = Rate(parent=tweet, author=request.user, rate_type='l')
+            new_rate.clean()
+            new_rate.save()
+            likes = tweet.get_like_count()
+            return JsonResponse({'result': 'add', 'likes': likes}, status=200)
+        elif request.method == 'DELETE':
+            rate = get_object_or_404(Rate, parent=tweet, author=request.user)
+            rate.delete()
+            print(tweet.like_count)
+            tweet = get_object_or_404(Tweet, pk=pk)
+            # maube it should be id of rate in json response, so it will be easier and faster to delete rate
+            likes = tweet.get_like_count()
+            return JsonResponse({'result': 'delete', 'likes': likes}, status=200)

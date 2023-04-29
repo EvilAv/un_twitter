@@ -19,7 +19,7 @@
                             <h6 class="mb-0 strong text-primary">
                                 <a class="text-decoration-none" href="{{ tweet.author.get_absolute_url }}">{{ tweet.author }}</a>
                             </h6>
-                            <p class="mb-0 opacity-75 text-break">{{ tweet.text }}</p>
+                            <p class="mb-0 opacity-75 text-break" style="white-space: pre-line">{{ tweet.text }}</p>
                         </div>
                         <div>
                             <p class="mb-0">
@@ -35,7 +35,7 @@
                         <div class="col">
                             <button type="button" class="btn btn-outline-danger">
                                 <svg class="bi" width="16" height="16" fill="currentColor"><use xlink:href="#likes"/></svg>
-                                {{ tweet.likeCount }}
+                                {{ tweet.get_like_count }}
                             </button>
                         </div>
                         <div class="col">
