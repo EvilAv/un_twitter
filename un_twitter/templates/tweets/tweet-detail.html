@@ -12,7 +12,7 @@
     <div class="col-3"></div>
         <div class="list-group col-5">
             <div id="list-of-tweets">
-                <div class="list-group-item list-group-item-action gap-3 py-3 tweet" aria-current="true">
+                <div class="list-group-item list-group-item-action gap-3 py-3" aria-current="true" id="tweet">
                     <div class="d-flex gap-2 w-100 justify-content-between" data-id="18">
                         <div>
                             <h6 class="mb-0">{{ tweet.author.nickname }}</h6>
@@ -33,9 +33,13 @@
                     <hr>
                     <div class="row row-cols-2">
                         <div class="col">
-                            <button type="button" class="btn btn-outline-danger">
+                            {% if is_liked %}
+                            <button type="button" class="btn btn-outline-danger active like-btn">
+                            {% else %}
+                            <button type="button" class="btn btn-outline-danger like-btn">
+                            {% endif %}
                                 <svg class="bi" width="16" height="16" fill="currentColor"><use xlink:href="#likes"/></svg>
-                                {{ tweet.get_like_count }}
+                                <span class="like-counter">{{ tweet.get_like_count }}</span>
                             </button>
                         </div>
                         <div class="col">
@@ -102,6 +106,72 @@
         </div>
     <div class="col-3"></div>
 </div>
+<script>
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    const tweet = document.querySelector('#tweet');
+
+    tweet.addEventListener('click', function(event) {
+        const btn = event.target.closest('button');
+        if (btn && btn.classList.contains('like-btn')){
+            const url = '/tweet/{{ tweet.pk }}/rate-handler';
+
+            let json = JSON.stringify({});
+
+            const xhr = new XMLHttpRequest();
+            xhr.responseType = 'json';
+
+            let method;
+            if (btn.classList.contains('active')){
+                method = 'DELETE';
+            } else {
+                method = 'POST';
+            }
+
+            xhr.open(method, url);
+
+            xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
+            xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+            xhr.onload = function(){
+            const response = xhr.response;
+
+                if (xhr.status === 200){
+                    console.log(xhr.statusText);
+
+                    if (response.result === 'add'){
+                        btn.classList.add('active');
+
+                    } else if (response.result === 'delete'){
+                        btn.classList.remove('active');
+                    }
+                    let likes = btn.querySelector('.like-counter');
+                    likes.textContent = response.likes;
+
+                } else if (xhr.status === 500){
+                    console.log(xhr.statusText)
+                }
+                // also add 400 and 500 status and 401/403
+            }
+            xhr.send(json);
+        }
+
+    })
+</script>
 {% endblock %}
 
 {% block sidebar_buttons %}

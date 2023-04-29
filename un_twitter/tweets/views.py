@@ -102,7 +102,8 @@ def create_tweet(request):
 def detail_tweet(request, pk):
     tweet = get_object_or_404(Tweet, pk=pk)
     comments = Comment.objects.filter(parent=tweet)
-    return render(request, 'tweets/tweet-detail.html', {'tweet': tweet, 'comments': comments})
+    is_liked = tweet.is_liked_by_user(request.user)
+    return render(request, 'tweets/tweet-detail.html', {'tweet': tweet, 'comments': comments, 'is_liked': is_liked})
 
 
 def add_comment(request, pk):
@@ -126,7 +127,7 @@ def delete_comment(request, pk, comId):
     return redirect(reverse('tweet-detail', args=[str(pk)]))
 
 
-def add_rate(request, pk):
+def handle_rate(request, pk):
     is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
 
     tweet = get_object_or_404(Tweet, pk=pk)
@@ -140,7 +141,6 @@ def add_rate(request, pk):
         elif request.method == 'DELETE':
             rate = get_object_or_404(Rate, parent=tweet, author=request.user)
             rate.delete()
-            print(tweet.like_count)
             tweet = get_object_or_404(Tweet, pk=pk)
             # maube it should be id of rate in json response, so it will be easier and faster to delete rate
             likes = tweet.get_like_count()

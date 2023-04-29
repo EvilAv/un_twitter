@@ -15,5 +15,5 @@ urlpatterns = [
     path('tweet/<int:pk>/add-comment', views.add_comment, name='add-comment'),
     path('tweet/<int:pk>/delete-comment/<int:comId>', views.delete_comment, name='delete-comment'),
 
-    path('tweet/<int:pk>/rate-handler', views.add_rate, name='rate-handler'),
+    path('tweet/<int:pk>/rate-handler', views.handle_rate, name='rate-handler'),
 ]
