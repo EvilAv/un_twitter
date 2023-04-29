@@ -51,6 +51,12 @@ function generateTweet(tweetObj, place){
     if (tweetObj.isLiked){
         isLiked='active';
     }
+    let deleteBtn = '';
+    if (tweetObj.isAuthor){
+        deleteBtn = '<div><abbr class="text-decoration-none" title="Удалить">'+
+            '<a href="'+tweetObj.deleteLink+
+            '" class="link-danger text-decoration-none delete-btn"><strong>Х</strong></a></abbr></div>';
+    }
     tweetContent = '<div class="list-group-item list-group-item-action gap-3 py-3 tweet" aria-current="true">'+
                 '<div class="d-flex gap-2 w-100 justify-content-between" data-id="18"><div>'+
                     '<h6 class="mb-0">'+
@@ -63,7 +69,8 @@ function generateTweet(tweetObj, place){
                     '<p class="mb-0"><small class="opacity-50 text-nowrap">'+
                     tweetObj.date+'</small></p>'+
                     '<p class="mb-0"><small class="opacity-50 text-nowrap">'+
-                    tweetObj.time+'</small></p></div></div>'+
+                    tweetObj.time+'</small></p>'+
+                    deleteBtn+'</div></div>'+
                     '<hr><div class="row row-cols-2"><div class="col"><button type="button" class="btn btn-outline-danger like-btn '+isLiked+
                         '" data-id="'+tweetObj.tweetId+'">'+
                         '<svg class="bi" width="16" height="16" fill="currentColor"><use xlink:href="#likes"/></svg> '+
@@ -192,6 +199,35 @@ function generateTweet(tweetObj, place){
             xhr.send(json);
         }
 
+    })
+
+    parent.addEventListener('click', function(){
+        const btn = event.target.closest('a');
+        if (btn && btn.classList.contains('delete-btn')){
+            event.preventDefault();
+            if (confirm('Вы действительно хотите удалить этот твит?')){
+                
+                let json = JSON.stringify({});
+                const xhr = new XMLHttpRequest();
+                xhr.responseType = 'json';
+
+                xhr.open('DELETE', btn.href);
+                xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
+                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+                xhr.onload = function(){
+                    const response = xhr.response;
+
+                    if (xhr.status === 200){
+                        console.log(xhr.statusText)
+                        tweet = btn.closest('.tweet').parentNode;
+                        console.log(tweet);
+                        tweet.remove();
+                    }
+                    // also add 400 and 500 status and 401/403
+                }
+                xhr.send(json);
+            }
+        }
     })
 
     const myForm = document.querySelector('#tweet-creator');

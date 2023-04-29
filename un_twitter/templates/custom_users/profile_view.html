@@ -64,9 +64,9 @@ function getCookie(name) {
     errorMsg.classList.add('mt-2');
     errorMsg.textContent = 'Ошибка!';
 
-
-    btn.addEventListener('click', function() {
-    // когда нажимаем на кнопку, то она тут же становится активной, только после этого заупскается обработчик
+    if (btn){
+        btn.addEventListener('click', function() {
+        // когда нажимаем на кнопку, то она тут же становится активной, только после этого заупскается обработчик
         if (btn.classList.contains('active')) {
 
             // let json = JSON.stringify({
@@ -122,10 +122,9 @@ function getCookie(name) {
                 // also add 400 and 500 status and 401/403
             }
             xhr.send(json);
-
-
         }
-    });
+        });
+    }
 
 </script>
 

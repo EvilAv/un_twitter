@@ -61,7 +61,9 @@ class Tweet(models.Model):
             'commentCount': self.get_comment_count(),
             'tweetLink': self.get_absolute_url(),
             'tweetId': self.pk,
-            'isLiked': self.is_liked_by_user(user)
+            'isLiked': self.is_liked_by_user(user),
+            'deleteLink': self.get_delete_link(),
+            'isAuthor': self.is_author(user)
         }
 
     class Meta:
@@ -93,6 +95,9 @@ class Tweet(models.Model):
 
     def get_delete_link(self):
         return reverse('delete-tweet', args=[str(self.pk)])
+
+    def is_author(self, user):
+        return self.author == user
 
 
 class Comment(models.Model):

@@ -148,10 +148,14 @@ def handle_rate(request, pk):
 
 
 def delete_tweet(request, pk):
+    is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
     tweet = get_object_or_404(Tweet, pk=pk)
     user = request.user
-    print(user)
     if tweet.author == user:
-        print('aaa')
         tweet.delete()
-    return redirect(reverse('tweet-list', args=[str(user.pk)]))
+    if is_ajax:
+        if request.method == 'DELETE':
+            return JsonResponse({}, status=200)
+    if request.method == 'POST':
+        return redirect(reverse('tweet-list', args=[str(user.pk)]))
+
