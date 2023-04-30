@@ -48,12 +48,15 @@ INSTALLED_APPS = [
     # my apps
     'tweets',
     'custom_users',
+    'chat',
 ]
 
 AUTH_USER_MODEL = 'custom_users.CustomUser'
 
 LOGOUT_REDIRECT_URL = '/'
 LOGIN_REDIRECT_URL = '/'
+
+LOGIN_URL = '/users/login'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

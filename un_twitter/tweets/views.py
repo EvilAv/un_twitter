@@ -5,6 +5,8 @@ from .models import Test, Tweet, Comment, Rate
 from .forms import TestForm, TweetForm, CommentForm
 from custom_users.models import CustomUser
 from django.utils import timezone
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 
 # Create your views here.
@@ -57,11 +59,13 @@ def create_test(request):
     return render(request, 'tweets/tweet-create.html', {'form': form})
 
 
+@login_required
 def tweet_list(request, pk):
     viewed_user = CustomUser.objects.get(pk=pk)
     return render(request, 'tweets/tweets.html', {'viewed_user': viewed_user})
 
 
+@login_required
 def get_tweets(request, start, pk):
     # maybe it should be prohibited to enter json part but i am not sure
     viewed_user = CustomUser.objects.get(pk=pk)
@@ -80,6 +84,7 @@ def get_tweets(request, start, pk):
     return JsonResponse(data)
 
 
+@login_required
 def create_tweet(request):
     if request.method == 'POST':
         form = TweetForm(request.POST)
@@ -99,6 +104,7 @@ def create_tweet(request):
                 return JsonResponse(form.errors, status=400)
 
 
+@login_required
 def detail_tweet(request, pk):
     tweet = get_object_or_404(Tweet, pk=pk)
     comments = Comment.objects.filter(parent=tweet)
@@ -106,6 +112,7 @@ def detail_tweet(request, pk):
     return render(request, 'tweets/tweet-detail.html', {'tweet': tweet, 'comments': comments, 'is_liked': is_liked})
 
 
+@login_required
 def add_comment(request, pk):
     tweet = get_object_or_404(Tweet, pk=pk)
     if request.method == 'POST':
@@ -120,6 +127,7 @@ def add_comment(request, pk):
     return redirect(reverse('tweet-detail', args=[str(pk)]))
 
 
+@login_required
 def delete_comment(request, pk, comId):
     comment = get_object_or_404(Comment, pk=comId)
     if request.user == comment.author:
@@ -127,6 +135,7 @@ def delete_comment(request, pk, comId):
     return redirect(reverse('tweet-detail', args=[str(pk)]))
 
 
+@login_required
 def handle_rate(request, pk):
     is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
 
@@ -147,6 +156,7 @@ def handle_rate(request, pk):
             return JsonResponse({'result': 'delete', 'likes': likes}, status=200)
 
 
+@login_required
 def delete_tweet(request, pk):
     is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
     tweet = get_object_or_404(Tweet, pk=pk)

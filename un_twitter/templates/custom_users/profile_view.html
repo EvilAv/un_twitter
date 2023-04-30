@@ -32,6 +32,13 @@
                 {% else %}
                     <button type="button" class="btn btn-outline-dark" data-bs-toggle="button" id="follow-btn">Подписаться</button>
                 {% endif %}
+          <div class="lead mt-2">
+            <strong>
+                <a href="{% url 'chat-create' viewed_user.pk %}" class="text-decoration-none">
+                    <svg class="bi me-2" width="16" height="16" fill="currentColor"><use xlink:href="#write_msg"/></svg>Написать
+                </a>
+            </strong>
+          </div>
             {% endif %}
       </div>
     <div class="col-3"></div>
@@ -144,9 +151,9 @@ function getCookie(name) {
     </a>
 </li>
 <li class="nav-item">
-    <a href="#" class="nav-link link-dark" aria-current="page">
+    <a href="{% url 'dialogue-list' user.pk %}" class="nav-link link-dark" aria-current="page">
       <svg class="bi me-2" width="16" height="16"><use xlink:href="#chats"/></svg>
-        <strong>Диалоги</strong> <span class="badge text-bg-dark">4</span>
+        <strong>Диалоги</strong>
     </a>
 </li>
 <li class="nav-item">

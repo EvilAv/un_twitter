@@ -7,6 +7,8 @@ from django.http import JsonResponse
 import json
 from django.views.generic import ListView
 from django.db.models import Q
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 
 # Create your views here.
@@ -25,7 +27,7 @@ def signup(request):
     return render(request, 'custom_users/signup.html', {'form': form})
 
 
-class UserUpdateView(generic.UpdateView):
+class UserUpdateView(generic.UpdateView, LoginRequiredMixin):
     form_class = CustomUserChangeForm
     template_name = 'custom_users/edit.html'
 
@@ -35,6 +37,7 @@ class UserUpdateView(generic.UpdateView):
         return CustomUser.objects.filter(id=user.id)
 
 
+@login_required
 def profile_view(request, pk):
     viewed_user = get_object_or_404(CustomUser, pk=pk)
 
@@ -49,6 +52,7 @@ def profile_view(request, pk):
                   {'data': data, 'viewed_user': viewed_user, 'is_follower': is_follower})
 
 
+@login_required
 def add_follow(request, pk):
     if request.method == 'POST':
         follow = Followers(the_one_who_follow=request.user,follow_target=CustomUser.objects.get(pk=pk))
@@ -62,6 +66,7 @@ def add_follow(request, pk):
     return render(request, 'tweets/index.html')
 
 
+@login_required
 def delete_follow(request, pk):
     if request.method == 'POST':
         Followers.objects.filter(the_one_who_follow=request.user,follow_target=CustomUser.objects.get(pk=pk)).delete()
@@ -73,16 +78,18 @@ def delete_follow(request, pk):
     return render(request, 'tweets/index.html')
 
 
+@login_required
 def show_follows(request):
     list_of_follows = Followers.objects.filter(the_one_who_follow=request.user)
     return render(request, 'custom_users/list_of_follows.html', {'list': list_of_follows})
 
 
+@login_required
 def main_search(request):
     return render(request, 'custom_users/main_search.html')
 
 
-class SearchView(ListView):
+class SearchView(ListView, LoginRequiredMixin):
     model = CustomUser
     template_name = 'custom_users/search_results.html'
     context_object_name = 'results'
