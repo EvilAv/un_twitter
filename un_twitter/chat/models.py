@@ -28,3 +28,7 @@ class Dialogue(models.Model):
     class Meta:
         ordering = ['-last_activity']
 
+
+class TestMsg(models.Model):
+    dialogue = models.ForeignKey(Dialogue, on_delete=models.CASCADE)
+    text = models.CharField(max_length=255)

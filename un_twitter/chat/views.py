@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.shortcuts import render, redirect, get_object_or_404, reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from .models import Dialogue
+from .models import Dialogue, TestMsg
 from django.db.models import Q
 from custom_users.models import CustomUser
 from django.core.exceptions import ObjectDoesNotExist
@@ -19,7 +19,8 @@ def dialogue_list(request, pk):
 @login_required
 def chat_detail(request, pk):
     dialogue = get_object_or_404(Dialogue, pk=pk)
-    return render(request, 'chat/chat-detail.html', {'dialogue': dialogue})
+    messages = TestMsg.objects.filter(dialogue=dialogue)
+    return render(request, 'chat/chat-detail.html', {'dialogue': dialogue, 'messages': messages})
 
 
 @login_required

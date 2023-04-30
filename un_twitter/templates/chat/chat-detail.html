@@ -22,14 +22,32 @@
     <!--        <p class="lead">Напишите кому-нибудь</p>-->
     <!--        <a href="{% url 'main-search' %}" class="btn btn-outline-secondary" role="button">Найти</a>-->
     <!--    </div>-->
-        <div class="border border-2 border-bottom-0 bg-light mt-5 px-0" id="message-list">
+
+        <div class="border border-2 border-bottom-0 bg-light mt-5 px-0 overflow-auto" id="message-list">
+            {% for msg in messages %}
+            <div class="row my-tweet mx-1 mt-1">
+                <div class="col-6"></div>
+                    <div class="text-light col-6 bg-dark">
+                        <p class="mb-0 opacity-75 text-break" style="white-space: pre-line">{{ msg.text }}</p>
+                        <p class="mb-0 text-end">
+                            <em class="opacity-50 text-nowrap">78:19</em>
+                            <em class="opacity-50 text-nowrap">61 Apr 6023</em>
+                        </p>
+                </div>
+            </div>
+            {% endfor %}
+            <style>
+                #message-list{
+                    height: 500px;
+                }
+            </style>
             <div class="text-center mt-5 pb-5" id="empty-dialogue">
                 <h6 class="display-6">:(</h6>
                 <p class="lead mb-0">Здесь пока ничего нет</p>
                 <p class="lead mb-0">Напишите первым</p>
             </div>
 
-            <div class="row my-tweet mx-1">
+            <div class="row my-tweet mx-1 mt-1">
                 <div class="col-6"></div>
                     <div class="text-light col-6 bg-dark">
                         <p class="mb-0 opacity-75 text-break" style="white-space: pre-line">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Accusantium blanditiis dolorum, error minus</p>
@@ -39,8 +57,9 @@
                         </p>
                 </div>
             </div>
+            
 
-            <div class="row alien-tweet mx-1">
+            <div class="row alien-tweet mx-1 mt-1">
                     <div class="my-tweet col-6 bg-white border">
                         <p class="mb-0 opacity-75 text-break" style="white-space: pre-line">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Accusantium blanditiis dolorum, error minus</p>
                         <p class="mb-0 text-start">
@@ -53,16 +72,88 @@
 
         </div>
 
-        <form id="message-sender" class="mt-0">
+        <form id="message-sender" class="mt-0" method="post" action=".">
             <div class="input-group mb-3">
-              <input type="text" class="form-control" placeholder="Введите сообщение..." aria-describedby="button-addon2">
-              <button class="btn btn-outline-dark" type="submit" id="button-addon2"><svg class="bi me-2" width="16" height="16" fill="currentColor"><use xlink:href="#send"/></svg>
+              <input type="text" class="form-control" placeholder="Введите сообщение..." name="text" aria-describedby="button-addon2">
+              <button class="btn btn-outline-dark" type="submit" id="send-btn"><svg class="bi me-2" width="16" height="16" fill="currentColor"><use xlink:href="#send"/></svg>
               </button>
             </div>
         </form>
     </div>
     <div class="col-3"></div>
 </div>
+
+<script>
+    const chatSocket = new WebSocket(
+        'ws://'
+        +window.location.host
+        +'/ws/chat/'
+        +'{{ dialogue.pk }}'
+
+    );
+
+    chatSocket.onmessage = function(event){
+        const data = JSON.parse(event.data);
+
+        if (data.text){
+            const msgText = '<div class="row alien-tweet mx-1 mt-1"><div class="my-tweet col-6 bg-white border">'+
+            '<p class="mb-0 opacity-75 text-break" style="white-space: pre-line">'+
+            data.text+
+            '</p><p class="mb-0 text-start"><em class="opacity-50 text-nowrap">78:19</em>\n<em class="opacity-50 text-nowrap">61 Apr 6023</em></p></div><div class="col-6"></div></div>';
+
+            parentList = document.querySelector('#message-list');
+            msg = document.createElement('div');
+            msg.innerHTML = msgText;
+            parentList.append(msg);
+            scrollToBottom();
+        }  else{
+            console.log('empty message');
+        }
+    }
+
+    chatSocket.onclose = function(event){
+        console.log('un ok')
+    }
+
+    fomrSender = document.querySelector('#message-sender');
+    fomrSender.addEventListener('submit', function(event){
+        event.preventDefault();
+        const form = new FormData(event.target);
+        
+        const msg = form.get('text');
+
+
+
+        if (!msg || msg.length >= 255) return;
+        else{
+            event.target.elements['text'].value = '';
+            chatSocket.send(JSON.stringify({
+                'text': msg,
+                'chat': '{{ dialogue.pk }}'
+            }));
+            console.log(msg);
+        }
+    });
+
+
+    fomrSender.addEventListener('input', function(event) {
+        const inputField = event.target;
+        if (!inputField) return;
+        if (inputField.value.length >= 255){
+            inputField.style.color = 'red';
+        } else {
+            inputField.style.color = 'black';
+        }
+    })
+
+
+    function scrollToBottom(){
+        list = document.querySelector('#message-list');
+        list.scrollTop = list.scrollHeight;
+    }
+
+    scrollToBottom();
+</script>
 {% endblock %}
 
 {% block sidebar_buttons %}
