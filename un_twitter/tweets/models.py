@@ -26,20 +26,6 @@ def integer_format(integer):
         return str(integer)
 
 
-# Create your models here.
-class Test(models.Model):
-    text = models.CharField(max_length=100)
-    sub_text = models.TextField(max_length=100, null=True)
-
-    class Meta:
-        ordering = ['-id']
-
-    def serialize(self):
-        return {
-            'text': self.text
-        }
-
-
 class Tweet(models.Model):
     author = models.ForeignKey('custom_users.CustomUser', on_delete=models.CASCADE)
     text = models.TextField(max_length=255)

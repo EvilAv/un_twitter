@@ -1,8 +1,8 @@
 import datetime
 from django.shortcuts import render, get_object_or_404, redirect, reverse
 from django.http import JsonResponse
-from .models import Test, Tweet, Comment, Rate
-from .forms import TestForm, TweetForm, CommentForm
+from .models import Tweet, Comment, Rate
+from .forms import TweetForm, CommentForm
 from custom_users.models import CustomUser
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required
@@ -12,51 +12,6 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 # Create your views here.
 def home_page(request):
     return render(request, 'tweets/index.html')
-
-
-def test_view(request, start):
-    # maybe it should be prohibited to enter json part but i am not sure
-    if start >= len(Test.objects.all()):
-        return JsonResponse({})
-    elif start + 40 >= len(Test.objects.all()):
-        end = len(Test.objects.all())
-    else:
-        end = start + 40
-    test_list = Test.objects.all()[start:end]
-    json_list = [i.serialize() for i in test_list]
-    data = {
-        'name': 'aaaa',
-        'data': json_list,
-    }
-    return JsonResponse(data)
-
-
-def test_list_view(request):
-    # data_format_test = Date_Test.objects.all()[0].test_date.strftime('%d %b %Y')
-    test_tweet = Tweet.objects.all()[0].serialize()
-    return render(request, 'tweets/test.html', {'test': test_tweet})
-
-
-def create_test(request):
-    if request.method == 'POST':
-        form = TestForm(request.POST)
-        is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
-
-        if form.is_valid():
-            test_tweet = form.save()
-            # test_tweet.text = 'хуй тебе'
-            test_tweet.sub_text = 'aaaaa'
-            test_tweet.save()
-            if is_ajax:
-                return JsonResponse(test_tweet.serialize(), status=201)
-        if form.errors:
-            if is_ajax:
-                return JsonResponse(form.errors, status=400)
-
-    else:
-        form = TestForm()
-
-    return render(request, 'tweets/tweet-create.html', {'form': form})
 
 
 @login_required

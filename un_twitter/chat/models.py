@@ -29,6 +29,17 @@ class Dialogue(models.Model):
         ordering = ['-last_activity']
 
 
-class TestMsg(models.Model):
+class Message(models.Model):
+    author = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     dialogue = models.ForeignKey(Dialogue, on_delete=models.CASCADE)
     text = models.CharField(max_length=255)
+    date = models.DateTimeField(default=timezone.now)
+
+    def get_date(self):
+        return timezone.localtime(self.date).strftime('%d %b %Y')
+
+    def get_time(self):
+        return timezone.localtime(self.date).strftime('%H:%M')
+
+    class Meta:
+        ordering = ['date']
