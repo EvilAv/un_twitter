@@ -21,12 +21,34 @@
     <h1 class="h3 mb-3 fw-normal">Выполните вход</h1>
 
     <div class="form-floating">
+      {% if form.username.errors %}
+      <input type="text" class="form-control is-invalid" id="floatingInput" name="username" placeholder="user">
+      <label for="floatingInput">Логин</label>
+        {% for error in form.username.errors %}
+            <div class="invalid-feedback">
+              {{ error|escape }}
+            </div>
+        {% endfor %}
+      {% else %}
       <input type="text" class="form-control" id="floatingInput" name="username" placeholder="user">
       <label for="floatingInput">Логин</label>
+      {% endif %}
+
     </div>
+
     <div class="form-floating">
+      {% if form.password.errors %}
+      <input type="password" class="form-control is-invalid" id="floatingPassword" name="password" placeholder="Password">
+      <label for="floatingPassword">Пароль</label>
+      {% for error in form.password.errors %}
+            <div class="invalid-feedback">
+              {{ error|escape }}
+            </div>
+        {% endfor %}
+      {% else %}
       <input type="password" class="form-control" id="floatingPassword" name="password" placeholder="Password">
       <label for="floatingPassword">Пароль</label>
+      {% endif %}
     </div>
 
     <button class="w-100 btn btn-lg btn-success" type="submit">Войти</button>
@@ -34,15 +56,6 @@
     <a href="{% url 'signup' %}" class="link-primary">Нет аккаунта?</a>
     <p class="mt-5 mb-3 text-muted">© 2023 K_K</p>
 
-                {% if form.errors %}
-              {% for fields in form %}
-                {% for error in fields.errors %}
-                  <div class="text-danger">
-                    <p class="">{{ error|escape }}</p>
-                  </div>
-                {% endfor %}
-              {% endfor %}
-            {% endif %}
   </form>
 </main>
 

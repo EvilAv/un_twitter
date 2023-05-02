@@ -31,6 +31,11 @@
             <div class="col-12">
               <label class="form-label">Логин</label>
               <input type="text" class="form-control" placeholder="Логин" name="username">
+              {% for error in form.username.errors %}
+                  <div class="text-danger">
+                    <p class="">{{ error|escape }}</p>
+                  </div>
+              {% endfor %}
               <div class="invalid-feedback">
                 Введите корректный логин.
               </div>
@@ -40,6 +45,11 @@
             <div class="col-sm-6">
               <label class="form-label">Имя</label>
               <input type="text" class="form-control" name="nickname">
+              {% for error in form.nickname.errors %}
+                  <div class="text-danger">
+                    <p class="">{{ error|escape }}</p>
+                  </div>
+              {% endfor %}
               <div class="invalid-feedback">
                 Введите корректное имя.
               </div>
@@ -58,6 +68,11 @@
               <div class="input-group has-validation">
                 <span class="input-group-text">@</span>
                 <input type="text" class="form-control" placeholder="Имя пользователя" name="main_name">
+                {% for error in form.main_name.errors %}
+                  <div class="text-danger">
+                    <p class="">{{ error|escape }}</p>
+                  </div>
+              {% endfor %}
               <div class="invalid-feedback">
                   Введите уникальное имя пользователя.
                 </div>
@@ -67,6 +82,11 @@
             <div class="col-12">
               <label class="form-label">Email <span class="text-muted">(Необязательно)</span></label>
               <input type="email" class="form-control" name="email" placeholder="you@example.com">
+              {% for error in form.email.errors %}
+                  <div class="text-danger">
+                    <p class="">{{ error|escape }}</p>
+                  </div>
+              {% endfor %}
               <div class="invalid-feedback">
                 Введите корректный e-mail.
               </div>
@@ -76,6 +96,11 @@
             <div class="col-12">
               <label  class="form-label">Введите пароль</label>
               <input type="password" class="form-control" placeholder="Пароль" name="password1">
+              {% for error in form.password1.errors %}
+                  <div class="text-danger">
+                    <p class="">{{ error|escape }}</p>
+                  </div>
+              {% endfor %}
               <div class="invalid-feedback">
                 Введите корректный пароль.
               </div>
@@ -84,6 +109,11 @@
             <div class="col-12">
               <label class="form-label">Повторите пароль</label>
               <input type="password" class="form-control" placeholder="Пароль" name="password2">
+              {% for error in form.password2.errors %}
+                  <div class="text-danger">
+                    <p class="">{{ error|escape }}</p>
+                  </div>
+              {% endfor %}
               <div class="invalid-feedback">
                 Пароль не совпадает.
               </div>
@@ -110,15 +140,6 @@
 <!--              </div>-->
 <!--            </div>-->
 <!--          </div>-->
-            {% if form.errors %}
-              {% for fields in form %}
-                {% for error in fields.errors %}
-                  <div class="text-danger">
-                    <p class="">{{ error|escape }}</p>
-                  </div>
-                {% endfor %}
-              {% endfor %}
-            {% endif %}
 
           <hr class="my-4">
 
