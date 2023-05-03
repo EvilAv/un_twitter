@@ -14,5 +14,7 @@ urlpatterns = [
 
     path('tweet/<int:pk>/rate-handler', views.handle_rate, name='rate-handler'),
 
-    path('tweet/<int:pk>/delete', views.delete_tweet, name='delete-tweet')
+    path('tweet/<int:pk>/delete', views.delete_tweet, name='delete-tweet'),
+
+    path('get/top-tweets/<int:start>', views.get_top_tweets, name='get-top-tweets'),
 ]

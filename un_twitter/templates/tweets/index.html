@@ -8,13 +8,207 @@
 {% endblock %}
 
 {% block content %}
-ЫЫЫЫ
+<div class="row mt-3">
+    <div class="col-3"></div>
+        <div class="list-group col-5">
+            <div id="list-of-tweets">
+            </div>
+        </div>
+    <div class="col-3"></div>
+</div>
+<script>
+
+  function getCookie(name) {
+      let cookieValue = null;
+      if (document.cookie && document.cookie !== '') {
+          const cookies = document.cookie.split(';');
+          for (let i = 0; i < cookies.length; i++) {
+              const cookie = cookies[i].trim();
+              // Does this cookie string begin with the name we want?
+              if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                  cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                  break;
+              }
+          }
+      }
+      return cookieValue;
+  }
+  
+  function generateTweet(tweetObj, place){
+      const tweetparent = document.querySelector('#list-of-tweets');
+      let isLiked = '';
+      if (tweetObj.isLiked){
+          isLiked='active';
+      }
+      let deleteBtn = '';
+      if (tweetObj.isAuthor){
+          deleteBtn = '<div><abbr class="text-decoration-none" title="Удалить">'+
+              '<a href="'+tweetObj.deleteLink+
+              '" class="link-danger text-decoration-none delete-btn"><strong>Х</strong></a></abbr></div>';
+      }
+      tweetContent = '<div class="list-group-item list-group-item-action gap-3 py-3 tweet" aria-current="true">'+
+                  '<div class="d-flex gap-2 w-100 justify-content-between" data-id="18"><div>'+
+                      '<h6 class="mb-0">'+
+                      tweetObj.nickname+'</h6>'+
+                      '<h6 class="mb-0 strong text-primary"><a class="text-decoration-none" href="'+
+                          tweetObj.authorLink+'">'+
+                          tweetObj.author+'</a></h6>'+
+                      '<p class="mb-0 opacity-75 text-break" style="white-space: pre-line;">'+
+                          tweetObj.text+'</p></div><div>'+
+                      '<p class="mb-0"><small class="opacity-50 text-nowrap">'+
+                      tweetObj.date+'</small></p>'+
+                      '<p class="mb-0"><small class="opacity-50 text-nowrap">'+
+                      tweetObj.time+'</small></p>'+
+                      deleteBtn+'</div></div>'+
+                      '<hr><div class="row row-cols-2"><div class="col"><button type="button" class="btn btn-outline-danger like-btn '+isLiked+
+                          '" data-id="'+tweetObj.tweetId+'">'+
+                          '<svg class="bi" width="16" height="16" fill="currentColor"><use xlink:href="#likes"/></svg> '+
+                          '<span class="like-counter">'+
+                              tweetObj.likeCount+
+                              '</span>'+
+                          '</button></div><div class="col"><a role="button" href="'+
+                              tweetObj.tweetLink+
+                              '" class="btn btn-light">'+
+                          '<svg class="bi" width="16" height="16" fill="currentColor"><use xlink:href="#comments"/></svg> '+ 
+                          tweetObj.commentCount+
+                          '</a></div></div>';
+      const newTweet = document.createElement('div');
+      newTweet.innerHTML = tweetContent;
+      if (place === 'before'){
+          tweetparent.prepend(newTweet);
+      } else {
+          tweetparent.append(newTweet);
+      }
+          
+  }
+  
+      const parent = document.querySelector('#list-of-tweets');
+      let progress = 10;
+      const pageHeight = document.documentElement.clientHeight;
+  
+      const existingTweets = new Set();
+  
+      loadData(0);
+  
+      window.addEventListener('scroll', isEnd);
+  
+      function isEnd(){
+          
+          // if we have enough time it should be rewrite with fetch cause it sends 2 responses while generate one result
+          const t = document.querySelector('.navigation');
+          // console.log(t.offsetHeight);
+          const bottomLineOfHtml = document.documentElement.getBoundingClientRect().bottom;
+          // console.log(bottomLineOfHtml);
+          // console.log(pageHeight);
+          // console.log('--------------------------------------')
+          if (bottomLineOfHtml <= pageHeight + 50){
+              loadData(progress);
+              progress+=10;
+          }
+      }
+  
+      function loadData(progress){
+          const xhr = new XMLHttpRequest();
+          xhr.responseType = 'json';
+          // <int:pk>/get/tweets/<int:start>
+          let url = '/get/top-tweets/'+progress;
+          xhr.open('GET', url);
+          xhr.onload = function(){
+              result = xhr.response;
+              if (result.data){
+                  for (let item of result.data){
+                      let tempId = item.tweetId;
+                      if (!existingTweets.has(tempId)){
+                          existingTweets.add(tempId);
+                          generateTweet(item, 'after');
+                      }
+                  }
+              }
+          }
+          xhr.send();
+      }
+  
+      parent.addEventListener('click', function(event) {
+          const btn = event.target.closest('button');
+          if (btn && btn.classList.contains('like-btn')){
+              const url = '/tweet/'+btn.dataset.id+'/rate-handler';
+  
+              let json = JSON.stringify({});
+  
+              const xhr = new XMLHttpRequest();
+              xhr.responseType = 'json';
+  
+              let method;
+              if (btn.classList.contains('active')){
+                  method = 'DELETE';
+              } else {
+                  method = 'POST';
+              }
+  
+              xhr.open(method, url);
+  
+              xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
+              xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+              xhr.onload = function(){
+              const response = xhr.response;
+  
+                  if (xhr.status === 200){
+                      console.log(xhr.statusText);
+  
+                      if (response.result === 'add'){
+                          btn.classList.add('active');
+  
+                      } else if (response.result === 'delete'){
+                          btn.classList.remove('active');
+                      }
+                      let likes = btn.querySelector('.like-counter');
+                      likes.textContent = response.likes;
+  
+                  } else if (xhr.status === 500){
+                      console.log(xhr.statusText)
+                  }
+                  // also add 400 and 500 status and 401/403
+              }
+              xhr.send(json);
+          }
+  
+      })
+  
+      parent.addEventListener('click', function(){
+          const btn = event.target.closest('a');
+          if (btn && btn.classList.contains('delete-btn')){
+              event.preventDefault();
+              if (confirm('Вы действительно хотите удалить этот твит?')){
+                  
+                  let json = JSON.stringify({});
+                  const xhr = new XMLHttpRequest();
+                  xhr.responseType = 'json';
+  
+                  xhr.open('DELETE', btn.href);
+                  xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
+                  xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+                  xhr.onload = function(){
+                      const response = xhr.response;
+  
+                      if (xhr.status === 200){
+                          console.log(xhr.statusText)
+                          tweet = btn.closest('.tweet').parentNode;
+                          console.log(tweet);
+                          tweet.remove();
+                      }
+                      // also add 400 and 500 status and 401/403
+                  }
+                  xhr.send(json);
+              }
+          }
+      })
+  </script>
 {% endblock %}
 
 {% block sidebar_buttons %}
 {% if user.is_authenticated %}
 <li class="nav-item">
-    <a href="#" class="nav-link link-light active bg-success" aria-current="page">
+    <a href="{% url 'home' %}" class="nav-link link-light active bg-success" aria-current="page">
       <svg class="bi me-2" width="16" height="16" fill="currentColor"><use xlink:href="#news"/></svg>
       <strong>Новости</strong>
     </a>

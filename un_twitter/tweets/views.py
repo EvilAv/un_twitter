@@ -10,6 +10,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 
 
 # Create your views here.
+@login_required
 def home_page(request):
     return render(request, 'tweets/index.html')
 
@@ -124,3 +125,18 @@ def delete_tweet(request, pk):
     if request.method == 'POST':
         return redirect(reverse('tweet-list', args=[str(user.pk)]))
 
+
+def get_top_tweets(request, start):
+    tweets = Tweet.objects.all().order_by('-like_count', '-date')
+    if start >= len(tweets):
+        return JsonResponse({})
+    elif start + 10 >= len(tweets):
+        end = len(tweets)
+    else:
+        end = start + 10
+    tweets_list = tweets[start:end]
+    json_list = [i.serialize(request.user) for i in tweets_list]
+    data = {
+        'data': json_list,
+    }
+    return JsonResponse(data)
