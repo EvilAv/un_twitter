@@ -11,6 +11,9 @@ from django.core.exceptions import ObjectDoesNotExist
 @login_required
 def dialogue_list(request, pk):
     # User.objects.filter(Q(income__gte=5000) | Q(income__isnull=True))
+    raw_d_list = Dialogue.objects.filter(Q(side_a=request.user) | Q(side_b=request.user))
+    for d in raw_d_list:
+        d.self_check()
     d_list = Dialogue.objects.filter(Q(side_a=request.user) | Q(side_b=request.user))
     return render(request, 'chat/dialogue-list.html', {'d_list': d_list})
 
@@ -21,6 +24,9 @@ def chat_detail(request, pk):
     user = request.user
     if dialogue.side_a == user or dialogue.side_b == user:
         messages = Message.objects.filter(dialogue=dialogue)
+        for m in messages:
+            if not m.author == user:
+                m.mark_as_read()
         return render(request, 'chat/chat-detail.html', {'dialogue': dialogue, 'messages': messages})
     else:
         return redirect(reverse('dialogue-list', args=[str(user.pk)]))

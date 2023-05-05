@@ -1,6 +1,11 @@
 {% extends 'base.html' %}
 {% block title %}
 Диалог с
+{% if user == dialogue.side_a %}
+    {{ dialogue.side_b.nickname }}
+{% else %}
+    {{ dialogue.side_a.nickname }}
+{% endif %}
 {% endblock %}
 
 {% block page_header %}
@@ -13,47 +18,66 @@
 {% endblock %}
 
 {% block content %}
+<style>
+.dot {
+  height: 10px;
+  width: 10px;
+  background-color: red;
+  border-radius: 50%;
+  display: inline-block;
+}
+</style>
+<!--to use-->
+<!--<span class="dot"></span>-->
 <div class="row">
     <div class="col-3"></div>
     <div class="col-6">
-    <!--    <div class="text-center mt-2">-->
-    <!--        <h6 class="display-6">:(</h6>-->
-    <!--        <p class="lead mb-0">Здесь пока ничего нет</p>-->
-    <!--        <p class="lead">Напишите кому-нибудь</p>-->
-    <!--        <a href="{% url 'main-search' %}" class="btn btn-outline-secondary" role="button">Найти</a>-->
-    <!--    </div>-->
 
         <div class="border border-2 border-bottom-0 bg-light mt-5 px-0 overflow-auto" id="message-list">
             {% for msg in messages %}
-            {% if msg.author == user %}
-                <div class="row my-tweet mx-1 mt-1">
-                    <div class="col-6"></div>
-                        <div class="text-light col-6 bg-dark">
-                            <h6 class="my-0"><a href="{% url 'profile' msg.author.pk %}" class="text-decoration-none link-light">{{ msg.author.nickname }}</a></h6>
-                            <p class="mb-0 opacity-75 text-break" style="white-space: pre-line">{{ msg.text }}</p>
-                            <p class="mb-0 text-end">
-                                <em class="opacity-50 text-nowrap">{{ msg.get_time }}</em>
-                                <em class="opacity-50 text-nowrap">{{ msg.get_date }}</em>
-                            </p>
+            <div id="message-{{ msg.pk }}">
+                {% if msg.author == user %}
+                    <div class="row my-tweet mx-1 mt-1">
+                        <div class="col-6"></div>
+                            <div class="text-light col-6 bg-dark">
+                                <h6 class="my-0"><a href="{% url 'profile' msg.author.pk %}" class="text-decoration-none link-light">{{ msg.author.nickname }}</a></h6>
+                                <p class="mb-0 opacity-75 text-break" style="white-space: pre-line">{{ msg.text }}</p>
+                                <p class="mb-0 text-end">
+                                    <em class="opacity-50 text-nowrap">{{ msg.get_time }}</em>
+                                    <em class="opacity-50 text-nowrap">{{ msg.get_date }}
+                                    {% if msg.read %}
+                                    <svg class="bi me-2" width="20" height="20" fill="currentColor"><use class="mark" xlink:href="#msg-read"/></svg></em>
+                                    {% else %}
+                                    <svg class="bi me-2" width="20" height="20" fill="currentColor"><use class="mark" xlink:href="#msg-sent"/></svg></em>
+                                    {% endif %}
+                                </p>
+                        </div>
                     </div>
-                </div>
-            {% else %}
-                <div class="row alien-tweet mx-1 mt-1">
-                        <div class="col-6 bg-white border">
-                            <h6 class="my-0"><a href="{% url 'profile' msg.author.pk %}" class="text-decoration-none ">{{ msg.author.nickname }}</a></h6>
-                            <p class="mb-0 opacity-75 text-break" style="white-space: pre-line">{{ msg.text }}</p>
-                            <p class="mb-0 text-start">
-                                <em class="opacity-50 text-nowrap">{{ msg.get_time }}</em>
-                                <em class="opacity-50 text-nowrap">{{ msg.get_date }}</em>
-                            </p>
+                {% else %}
+                    <div class="row alien-tweet mx-1 mt-1">
+                            <div class="col-6 bg-white border">
+                                <h6 class="my-0"><a href="{% url 'profile' msg.author.pk %}" class="text-decoration-none ">{{ msg.author.nickname }}</a></h6>
+                                <p class="mb-0 opacity-75 text-break" style="white-space: pre-line">{{ msg.text }}</p>
+                                <p class="mb-0 text-start">
+                                    <em class="opacity-50 text-nowrap">{{ msg.get_time }}</em>
+                                    <em class="opacity-50 text-nowrap">{{ msg.get_date }}
+                                    {% if msg.read %}
+                                    <svg class="bi me-2" width="20" height="20" fill="currentColor"><use class="mark" xlink:href="#msg-read"/></svg></em>
+                                    {% else %}
+                                    <svg class="bi me-2" width="20" height="20" fill="currentColor"><use class="mark" xlink:href="#msg-sent"/></svg></em>
+                                    {% endif %}
+
+                                </p>
+                        </div>
+                        <div class="col-6"></div>
                     </div>
-                    <div class="col-6"></div>
-                </div>
-            {% endif %}
+                {% endif %}
+            </div>
+
             {% endfor %}
             <style>
                 #message-list{
-                    height: 500px;
+                    height: 650px;
                 }
             </style>
             {% if not messages %}
@@ -85,47 +109,73 @@
 
     );
 
+    chatSocket.onopen = function(event){
+        readAll();
+    }
+
     chatSocket.onmessage = function(event){
         const data = JSON.parse(event.data);
 
-        if (data.text){
-            let msgText;
-            const link = '/users/'+data.author+'/profile';
-            if (data.author == '{{ user.pk }}'){
-                msgText = '<div class="row my-tweet mx-1 mt-1"><div class="col-6"></div><div class="text-light col-6 bg-dark">'+
-                '<h6 class="my-0"><a href="'+link+'" class="text-decoration-none link-light">'+
-                data.author_name+
-                '</a></h6><p class="mb-0 opacity-75 text-break" style="white-space: pre-line">'+
-                data.text+
-                '</p><p class="mb-0 text-end"><em class="opacity-50 text-nowrap">'+
+        if (data.type === 'msg-send'){
+            if (data.text){
+                let msgText;
+                const link = '/users/'+data.author+'/profile';
+                if (data.author == '{{ user.pk }}'){
+                    msgText = '<div class="row my-tweet mx-1 mt-1"><div class="col-6"></div><div class="text-light col-6 bg-dark">'+
+                    '<h6 class="my-0"><a href="'+link+'" class="text-decoration-none link-light">'+
+                    data.author_name+
+                    '</a></h6><p class="mb-0 opacity-75 text-break" style="white-space: pre-line">'+
+                    data.text+
+                    '</p><p class="mb-0 text-end"><em class="opacity-50 text-nowrap">'+
+                        data.time+
+                        '</em>\n<em class="opacity-50 text-nowrap">'+
+                        data.date+
+                        '<svg class="bi me-2" width="20" height="20" fill="currentColor"><use class="mark" xlink:href="#msg-sent"/></svg></em></p></div></div>';
+                } else{
+
+                    msgText = '<div class="row alien-tweet mx-1 mt-1"><div class="col-6 bg-white border">'+
+                    '<h6 class="my-0"><a href="'+link+'" class="text-decoration-none ">'+
+                    data.author_name+
+                    '</a></h6><p class="mb-0 opacity-75 text-break" style="white-space: pre-line">'+
+                    data.text+
+                    '</p><p class="mb-0 text-start"><em class="opacity-50 text-nowrap">'+
                     data.time+
                     '</em>\n<em class="opacity-50 text-nowrap">'+
                     data.date+
-                    '</em></p></div></div>';
-            } else{
+                    '<svg class="bi me-2" width="20" height="20" fill="currentColor"><use class="mark" xlink:href="#msg-sent"/></svg></em></p></div><div class="col-6"></div></div>';
+                }
+                
+                parentList = document.querySelector('#message-list');
+                msg = document.createElement('div');
+                msg.setAttribute('id', 'message-'+data.pk)
+                msg.innerHTML = msgText;
+                parentList.append(msg);
+                if (placeholder){ placeholder.remove() }
+                scrollToBottom();
 
-                msgText = '<div class="row alien-tweet mx-1 mt-1"><div class="col-6 bg-white border">'+
-                '<h6 class="my-0"><a href="'+link+'" class="text-decoration-none ">'+
-                data.author_name+
-                '</a></h6><p class="mb-0 opacity-75 text-break" style="white-space: pre-line">'+
-                data.text+
-                '</p><p class="mb-0 text-start"><em class="opacity-50 text-nowrap">'+
-                data.time+
-                '</em>\n<em class="opacity-50 text-nowrap">'+
-                data.date+
-                '</em></p></div><div class="col-6"></div></div>';
+                if (data.author != '{{ user.pk }}'){
+                    chatSocket.send(JSON.stringify({
+                        'type': 'read-one',
+                        'id': data.pk,
+                    }));
+                }
+
+            }  else{
+                console.log('empty message');
             }
-            
-            parentList = document.querySelector('#message-list');
-            msg = document.createElement('div');
-            msg.innerHTML = msgText;
-            parentList.append(msg);
-            if (placeholder){ placeholder.remove() }
-            scrollToBottom();
-        }  else{
-            console.log('empty message');
-        }
         // console.log(data);
+        } else if (data.type === 'read-all'){
+
+            if (data.author != '{{ user.pk }}'){
+                // console.log(data);
+                markSideAsRead('my');
+            }
+
+        } else if (data.type === 'read-one'){
+            id = '#message-'+data.pk;
+            node = document.querySelector(id);
+            markAsRead(node);
+        }
     }
 
     chatSocket.onclose = function(event){
@@ -147,9 +197,9 @@
         else{
             event.target.elements['text'].value = '';
             chatSocket.send(JSON.stringify({
+                'type': 'send-msg',
                 'text': msg,
                 'chat': '{{ dialogue.pk }}',
-                'author': '{{ user.pk }}'
             }));
         }
     });
@@ -171,7 +221,32 @@
         list.scrollTop = list.scrollHeight;
     }
 
+    function markAsRead(node){
+        const mark = node.querySelector('.mark');
+        mark.setAttribute('xlink:href', '#msg-read');
+    }
+
+    function markSideAsRead(side){
+        if (side === 'my'){
+            for (elem of document.querySelectorAll('.my-tweet')){
+                markAsRead(elem);
+            }
+        } else{
+            for (elem of document.querySelectorAll('.alien-tweet')){
+                markAsRead(elem);
+            }
+        }
+    }
+
+    function readAll(){
+        chatSocket.send(JSON.stringify({
+                'type': 'read-all',
+            }));
+    }
+
+
     scrollToBottom();
+    //console.log(document.querySelector('#message-75').querySelector('.mark'));
 </script>
 {% endblock %}
 

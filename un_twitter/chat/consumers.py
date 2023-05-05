@@ -34,27 +34,50 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     async def receive(self, text_data=None, bytes_data=None):
         data = json.loads(text_data)
-        text = data['text']
-        dialogue = data['chat']
-        author = data['author']
-        date_time = timezone.localtime(timezone.now())
-        date = timezone.localtime(date_time).strftime('%d %b %Y')
-        time = timezone.localtime(date_time).strftime('%H:%M')
-        author_name = await self.get_author_name(author)
 
-        await self.save_message(date_time, text, self.current_user, dialogue)
+        type = data['type']
+        if type == 'send-msg':
+            text = data['text']
+            dialogue = data['chat']
+            date_time = timezone.localtime(timezone.now())
+            date = timezone.localtime(date_time).strftime('%d %b %Y')
+            time = timezone.localtime(date_time).strftime('%H:%M')
+            author_name = self.current_user.nickname
 
-        await self.channel_layer.group_send(
-            self.room_group_name,
-            {
-                'type': 'chat_message',
-                'text': text,
-                'author': author,
-                'date': date,
-                'time': time,
-                'author_name': author_name,
-            }
-        )
+            m_id = await self.save_message(date_time, text, self.current_user, dialogue)
+            if m_id:
+                await self.channel_layer.group_send(
+                    self.room_group_name,
+                    {
+                        'type': 'chat_message',
+                        'text': text,
+                        'author': self.current_user.pk,
+                        'date': date,
+                        'time': time,
+                        'author_name': author_name,
+                        'pk': m_id,
+                    }
+                )
+        elif type == 'read-all':
+            await self.channel_layer.group_send(
+                self.room_group_name,
+                {
+                    'type': 'read_all',
+                    'author': self.current_user.pk, # we still know who sent the message to server here
+                }
+            )
+        elif type == 'read-one':
+            print(data)
+            print(self.current_user)
+            pk = data['id']
+            if await self.mark_as_read(pk):
+                await self.channel_layer.group_send(
+                    self.room_group_name,
+                    {
+                        'type': 'read_one',
+                        'pk': pk,
+                    }
+                )
 
     async def chat_message(self, event):
         text = event['text']
@@ -62,13 +85,16 @@ class ChatConsumer(AsyncWebsocketConsumer):
         date = event['date']
         time = event['time']
         author_name = event['author_name']
+        pk = event['pk']
 
         await self.send(text_data=json.dumps({
+            'type': 'msg-send',
             'text': text,
             'author': author,
             'date': date,
             'time': time,
-            'author_name': author_name
+            'author_name': author_name,
+            'pk': pk,
         }))
 
     @sync_to_async
@@ -78,12 +104,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
             user = CustomUser.objects.get(pk=author.pk)
 
             if len(text) <= 255:
-                Message.objects.create(author=user, dialogue=d, text=text, date=date_time)
-                d.last_activity = timezone.localtime(timezone.now())
-                d.save()
+                m = Message.objects.create(author=user, dialogue=d, text=text, date=date_time)
+                return m.pk
 
         except ObjectDoesNotExist:
-            pass
+            return None
 
     @sync_to_async
     def check_user(self, user, dialogue):
@@ -107,3 +132,26 @@ class ChatConsumer(AsyncWebsocketConsumer):
         except ObjectDoesNotExist:
             name = ''
         return name
+
+    async def read_all(self, event):
+        author = event['author']
+        await self.send(text_data=json.dumps({
+            'type': 'read-all',
+            'author': author,
+        }))
+
+    async def read_one(self, event):
+        pk = event['pk']
+        await self.send(text_data=json.dumps({
+            'type': 'read-one',
+            'pk': pk,
+        }))
+
+    @sync_to_async
+    def mark_as_read(self, pk):
+        try:
+            m = Message.objects.get(pk=pk)
+            m.mark_as_read()
+            return True
+        except ObjectDoesNotExist:
+            return False
