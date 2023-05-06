@@ -104,6 +104,35 @@
             </div>
         </div>
     </div>
+    <script>
+        const globalSocket = new WebSocket(
+            'ws://'
+            +window.location.host
+            +'/ws/global'
+    
+        );
+    
+        globalSocket.onopen = function(event){
+            console.log('ok');
+        }
+    
+    
+        globalSocket.onclose = function(event){
+            console.log('un ok')
+        }
+
+        globalSocket.onmessage = function(event){
+            const data = JSON.parse(event.data);
+            if (data.count > 0){
+                indicator = document.querySelector('#d-counter');
+                indicator.textContent = data.count;
+            }
+            console.log(data)
+        }
+
+
+    
+    </script>
 </body>
 {% load static %}
 <!--<script src="{% static 'js/bootstrap.min.js' %}"></script>-->

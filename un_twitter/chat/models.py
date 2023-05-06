@@ -10,6 +10,8 @@ class Dialogue(models.Model):
     side_b = models.ForeignKey(CustomUser, related_name='side_b', on_delete=models.CASCADE)
     last_activity = models.DateTimeField(default=timezone.now)
     msg_count = models.IntegerField(default=0)
+    is_read_by_side_a = models.BooleanField(default=True)
+    is_read_by_side_b = models.BooleanField(default=True)
 
     def clean(self):
         if self.side_b == self.side_a:
@@ -17,7 +19,9 @@ class Dialogue(models.Model):
         else:
             d_list1 = Dialogue.objects.filter(side_a=self.side_a, side_b=self.side_b)
             d_list2 = Dialogue.objects.filter(side_a=self.side_b, side_b=self.side_a)
-            if d_list1 or d_list2:
+            if d_list1 and d_list1[0].pk != self.pk:
+                raise ValidationError('You already have dialogue with this person')
+            if d_list2 and d_list2[0].pk != self.pk:
                 raise ValidationError('You already have dialogue with this person')
 
     def get_date(self):
@@ -50,12 +54,24 @@ class Message(models.Model):
     def mark_as_read(self):
         if not self.read:
             self.read = True
+            dialogue = self.dialogue
+
+            if dialogue.side_a != self.author:
+                dialogue.is_read_by_side_a = True
+            else:
+                dialogue.is_read_by_side_b = True
+            dialogue.save()
             self.save()
 
     def save(self, *args, **kwargs):
-        self.dialogue.msg_count += 1
-        self.dialogue.last_activity = self.date
-        self.dialogue.save()
+        if not self.read:
+            self.dialogue.msg_count += 1
+            self.dialogue.last_activity = self.date
+            if self.dialogue.side_a == self.author:
+                self.dialogue.is_read_by_side_b = False
+            else:
+                self.dialogue.is_read_by_side_a = False
+            self.dialogue.save()
         super().save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):

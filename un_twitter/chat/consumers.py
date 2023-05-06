@@ -67,8 +67,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 }
             )
         elif type == 'read-one':
-            print(data)
-            print(self.current_user)
             pk = data['id']
             if await self.mark_as_read(pk):
                 await self.channel_layer.group_send(
@@ -155,3 +153,77 @@ class ChatConsumer(AsyncWebsocketConsumer):
             return True
         except ObjectDoesNotExist:
             return False
+
+
+class GlobalConsumer(AsyncWebsocketConsumer):
+    async def connect(self):
+        self.current_user = self.scope['user']
+        self.room_group_name = 'global'
+
+        print('welcome to global')
+        count = await self.load_count(self.current_user)
+
+        await self.channel_layer.group_add(
+            self.room_group_name,
+            self.channel_name
+        )
+
+        await self.accept()
+
+        await self.channel_layer.group_send(
+            self.room_group_name,
+            {
+                'type': 'send_count',
+                'count': count,
+                'user': self.current_user.pk,
+            }
+        )
+
+    async def disconnect(self, code=None):
+        await self.channel_layer.group_discard(
+            self.room_group_name,
+            self.channel_name
+        )
+
+    # inside receive we know who sent message, inside magic function we know only the user who will get message
+    async def receive(self, text_data=None, bytes_data=None):
+        data = json.loads(text_data)
+
+        chat = data['chat']
+        user = await self.find_user(chat)
+        if user:
+            count = await self.load_count(user)
+            await self.channel_layer.group_send(
+                self.room_group_name,
+                {
+                    'type': 'send_count',
+                    'count': count,
+                    'user': user,
+                }
+            )
+
+    @sync_to_async
+    def load_count(self, user):
+        d_count = Dialogue.objects.filter(side_a=user, is_read_by_side_a=False).count()
+        d_count += Dialogue.objects.filter(side_b=user, is_read_by_side_b=False).count()
+        return d_count
+
+    @sync_to_async
+    def find_user(self, chat):
+        try:
+            dialogue = Dialogue.objects.get(pk=chat)
+            if dialogue.side_a == self.current_user:
+                return dialogue.side_b.pk
+            else:
+                return dialogue.side_a.pk
+        except ObjectDoesNotExist:
+            return None
+
+    async def send_count(self, event):
+        user = event['user']
+        count = event['count']
+        print('send to '+str(self.current_user))
+        if self.current_user.pk == user:
+            await self.send(text_data=json.dumps({
+                'count': count,
+            }))
