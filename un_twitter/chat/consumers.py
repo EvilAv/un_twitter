@@ -35,6 +35,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def receive(self, text_data=None, bytes_data=None):
         data = json.loads(text_data)
 
+        print(data)
+
         type = data['type']
         if type == 'send-msg':
             text = data['text']
@@ -73,6 +75,16 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     self.room_group_name,
                     {
                         'type': 'read_one',
+                        'pk': pk,
+                    }
+                )
+        elif type == 'delete-one':
+            pk = data['id']
+            if await self.delete_message(pk, self.current_user):
+                await self.channel_layer.group_send(
+                    self.room_group_name,
+                    {
+                        'type': 'delete_one',
                         'pk': pk,
                     }
                 )
@@ -154,6 +166,24 @@ class ChatConsumer(AsyncWebsocketConsumer):
         except ObjectDoesNotExist:
             return False
 
+    @sync_to_async
+    def delete_message(self, pk, user):
+        try:
+            msg = Message.objects.get(pk=pk)
+            if msg.author == user:
+                msg.delete()
+                return True
+            return False
+        except ObjectDoesNotExist:
+            return False
+
+    async def delete_one(self, event):
+        pk = event['pk']
+        await self.send(text_data=json.dumps({
+            'type': 'delete-one',
+            'pk': pk,
+        }))
+
 
 class GlobalConsumer(AsyncWebsocketConsumer):
     async def connect(self):
@@ -222,7 +252,7 @@ class GlobalConsumer(AsyncWebsocketConsumer):
     async def send_count(self, event):
         user = event['user']
         count = event['count']
-        print('send to '+str(self.current_user))
+        # print('send to '+str(self.current_user))
         if self.current_user.pk == user:
             await self.send(text_data=json.dumps({
                 'count': count,

@@ -77,7 +77,7 @@ class Message(models.Model):
     def delete(self, *args, **kwargs):
         self.dialogue.msg_count -= 1
         if self.dialogue.msg_count > 0:
-            self.dialogue.last_activity = Message.objects.filter(dialogue=self.dialogue)[-1].date
+            self.dialogue.last_activity = Message.objects.filter(dialogue=self.dialogue).reverse()[0].date
         self.dialogue.save()
         super().delete(*args, **kwargs)
 

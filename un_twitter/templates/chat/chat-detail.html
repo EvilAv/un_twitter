@@ -38,7 +38,7 @@
             <div id="message-{{ msg.pk }}">
                 {% if msg.author == user %}
                     <div class="row my-tweet mx-1 mt-1">
-                        <div class="col-6"></div>
+                        <div class="col-6 px-0"></div>
                             <div class="text-light col-6 bg-dark">
                                 <h6 class="my-0"><a href="{% url 'profile' msg.author.pk %}" class="text-decoration-none link-light">{{ msg.author.nickname }}</a></h6>
                                 <p class="mb-0 opacity-75 text-break" style="white-space: pre-line">{{ msg.text }}</p>
@@ -96,9 +96,6 @@
               </button>
             </div>
         </form>
-    </div>
-    <div class="col-3"></div>
-</div>
 
 <script>
     const chatSocket = new WebSocket(
@@ -121,7 +118,7 @@
                 let msgText;
                 const link = '/users/'+data.author+'/profile';
                 if (data.author == '{{ user.pk }}'){
-                    msgText = '<div class="row my-tweet mx-1 mt-1"><div class="col-6"></div><div class="text-light col-6 bg-dark">'+
+                    msgText = '<div class="row my-tweet mx-1 mt-1"><div class="col-6 px-0"></div><div class="text-light col-6 bg-dark">'+
                     '<h6 class="my-0"><a href="'+link+'" class="text-decoration-none link-light">'+
                     data.author_name+
                     '</a></h6><p class="mb-0 opacity-75 text-break" style="white-space: pre-line">'+
@@ -180,6 +177,10 @@
             id = '#message-'+data.pk;
             node = document.querySelector(id);
             markAsRead(node);
+        } else if (data.type === 'delete-one'){
+            id = '#message-'+data.pk;
+            node = document.querySelector(id);
+            node.remove();
         }
     }
 
@@ -252,6 +253,49 @@
 
     scrollToBottom();
     //console.log(document.querySelector('#message-75').querySelector('.mark'));
+
+    parentList = document.querySelector('#message-list');
+    let lastClick;
+    parentList.addEventListener('click', function(event){
+        const msg = event.target.closest('.my-tweet');
+        const deleteBtn = event.target.closest('div');
+        if (deleteBtn.id === 'delete-message'){
+            if (confirm('Вы действительно хотите удалить это сообщение?')) { 
+                if (lastClick){
+                    const msgId = lastClick.parentElement.id.split('-')[1]
+                    //console.log(msgId);
+                    chatSocket.send(JSON.stringify({
+                        'type': 'delete-one',
+                        'id': msgId,
+                    }));
+
+                } else {
+                    console.log('something went wrong')
+                }
+            }
+            lastClick.firstElementChild.innerHTML = '';
+            lastClick.lastElementChild.classList.add('bg-dark');
+            lastClick.lastElementChild.classList.remove('bg-danger');
+
+        } else{
+            if (lastClick){
+                lastClick.firstElementChild.innerHTML = '';
+                lastClick.lastElementChild.classList.add('bg-dark');
+                lastClick.lastElementChild.classList.remove('bg-danger');
+            }
+            if (msg){
+                const msgPart = msg.lastElementChild;
+                const btnPart = msg.firstElementChild;
+                btnPart.innerHTML += '<div id="delete-message" class="text-end"><abbr style="cursor: pointer;" title="Удалить">'
+                    +'<svg class="bi me-2" width="24" height="24"><use xlink:href="#delete-msg"/></svg></abbr></div>';
+                msgPart.classList.remove('bg-dark');
+                msgPart.classList.add('bg-danger');
+                lastClick = msg;
+
+            }
+        }
+
+    })
 </script>
 {% endblock %}
 
