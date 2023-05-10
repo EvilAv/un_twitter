@@ -7,6 +7,9 @@ from custom_users.models import CustomUser
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
+TOTAL_RATES = 0
+import time
+from .recomend import train_system, get_top_predictions
 
 
 # Create your views here.
@@ -102,6 +105,7 @@ def handle_rate(request, pk):
             new_rate.clean()
             new_rate.save()
             likes = tweet.get_like_count()
+            get_recommends_list(request.user, get_unviewed_list(request.user))
             return JsonResponse({'result': 'add', 'likes': likes}, status=200)
         elif request.method == 'DELETE':
             rate = get_object_or_404(Rate, parent=tweet, author=request.user)
@@ -140,3 +144,54 @@ def get_top_tweets(request, start):
         'data': json_list,
     }
     return JsonResponse(data)
+
+# recommendation functions soon will be removed to another view
+
+
+def make_dataset():
+    ts = time.time()
+    print(ts)
+    dataset = {'item': [], 'user': [], 'is_liked': []}
+    for item in Tweet.objects.all():
+        for user in CustomUser.objects.all():
+            is_rated = Rate.objects.filter(author=user, parent=item)
+            dataset['item'].append(item.pk)
+            dataset['user'].append(user.pk)
+            if is_rated:
+                dataset['is_liked'].append(1)
+            else:
+                dataset['is_liked'].append(0)
+    end = time.time()
+    print(end - ts)
+    print(dataset)
+    return dataset
+
+
+def get_unviewed_list(user):
+    res = []
+    for item in Tweet.objects.all():
+        is_rated = Rate.objects.filter(author=user, parent=item)
+        if not is_rated:
+            res.append(item.pk)
+    print(res)
+    return res
+
+
+def get_recommends_list(user, un_list):
+    global TOTAL_RATES
+    if TOTAL_RATES == 0:
+        TOTAL_RATES = Rate.objects.all().count() * 1.5
+        print(Rate.objects.all().count())
+        train_system(make_dataset())
+    if Rate.objects.all().count() >= TOTAL_RATES:
+        TOTAL_RATES *= 1.5
+        train_system(make_dataset())
+    recommends = get_top_predictions(user, un_list)
+    if not recommends:
+        train_system(make_dataset())
+        new_recommends = get_top_predictions(user, un_list)
+        print('>_<')
+        print(new_recommends)
+        return new_recommends
+    print(recommends)
+    return recommends
