@@ -3,11 +3,9 @@ from django.shortcuts import render, get_object_or_404, redirect, reverse
 from django.http import JsonResponse
 from .models import Tweet, Comment, Rate
 from .forms import TweetForm, CommentForm
-from custom_users.models import CustomUser
+from custom_users.models import CustomUser, Followers
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.mixins import LoginRequiredMixin
-TOTAL_RATES = 0
 import time
 from .recomend import train_system, get_top_predictions
 
@@ -16,6 +14,19 @@ from .recomend import train_system, get_top_predictions
 @login_required
 def home_page(request):
     return render(request, 'tweets/index.html')
+
+
+@login_required
+def followers_tweets_page(request):
+    subs = Followers.objects.filter(the_one_who_follow=request.user).values_list('follow_target')
+    if not subs:
+        return redirect('list-of-follows')
+    return render(request, 'tweets/followers-tweets.html')
+
+
+@login_required
+def recommend_page(request):
+    return render(request, 'tweets/recommendations.html')
 
 
 @login_required
@@ -105,7 +116,6 @@ def handle_rate(request, pk):
             new_rate.clean()
             new_rate.save()
             likes = tweet.get_like_count()
-            get_recommends_list(request.user, get_unviewed_list(request.user))
             return JsonResponse({'result': 'add', 'likes': likes}, status=200)
         elif request.method == 'DELETE':
             rate = get_object_or_404(Rate, parent=tweet, author=request.user)
@@ -145,15 +155,49 @@ def get_top_tweets(request, start):
     }
     return JsonResponse(data)
 
-# recommendation functions soon will be removed to another view
+
+@login_required
+def get_followers_tweets(request, start):
+    subs = Followers.objects.filter(the_one_who_follow=request.user).values_list('follow_target')
+    tweets = Tweet.objects.filter(author__in=subs).order_by('-date')
+    if start >= len(tweets):
+        return JsonResponse({})
+    elif start + 10 >= len(tweets):
+        end = len(tweets)
+    else:
+        end = start + 10
+    tweets_list = tweets[start:end]
+    json_list = [i.serialize(request.user) for i in tweets_list]
+    data = {
+        'data': json_list,
+    }
+    return JsonResponse(data)
+
+
+@login_required
+def get_recommended_tweets(request):
+    list_of_id = get_recommends_list(request.user, get_unviewed_list(request.user))
+    tweets_list = Tweet.objects.filter(pk__in=list_of_id)
+    json_list = [i.serialize(request.user) for i in tweets_list]
+    if not json_list:
+        data = {
+            'msg': 'no_rec'
+        }
+    else:
+        data = {
+            'data': json_list,
+        }
+    return JsonResponse(data)
 
 
 def make_dataset():
     ts = time.time()
-    print(ts)
     dataset = {'item': [], 'user': [], 'is_liked': []}
     for item in Tweet.objects.all():
         for user in CustomUser.objects.all():
+            # superuser filter
+            if user.is_superuser:
+                continue
             is_rated = Rate.objects.filter(author=user, parent=item)
             dataset['item'].append(item.pk)
             dataset['user'].append(user.pk)
@@ -163,7 +207,6 @@ def make_dataset():
                 dataset['is_liked'].append(0)
     end = time.time()
     print(end - ts)
-    print(dataset)
     return dataset
 
 
@@ -171,27 +214,17 @@ def get_unviewed_list(user):
     res = []
     for item in Tweet.objects.all():
         is_rated = Rate.objects.filter(author=user, parent=item)
-        if not is_rated:
+        if not is_rated and not item.author == user:
             res.append(item.pk)
-    print(res)
     return res
 
 
 def get_recommends_list(user, un_list):
-    global TOTAL_RATES
-    if TOTAL_RATES == 0:
-        TOTAL_RATES = Rate.objects.all().count() * 1.5
-        print(Rate.objects.all().count())
-        train_system(make_dataset())
-    if Rate.objects.all().count() >= TOTAL_RATES:
-        TOTAL_RATES *= 1.5
-        train_system(make_dataset())
+    ts = time.time()
+    train_system(make_dataset())
     recommends = get_top_predictions(user, un_list)
     if not recommends:
-        train_system(make_dataset())
-        new_recommends = get_top_predictions(user, un_list)
         print('>_<')
-        print(new_recommends)
-        return new_recommends
-    print(recommends)
+    end = time.time()
+    print(end - ts)
     return recommends

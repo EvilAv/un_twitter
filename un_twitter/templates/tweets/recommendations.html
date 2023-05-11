@@ -9,15 +9,20 @@
 
 {% block content %}
 <div class="sticky-top text-center bg-white py-2 px-2 fs-5 fw-light">
-    <mark>В рейтинге</mark>
+    <a class="text-decoration-none" href="{% url 'home' %}">В рейтинге</a>
     <a class="text-decoration-none" href="{% url 'subs' %}">Мои подписки</a>
-    <a href="{% url 'recommend' %}" class="text-decoration-none">Рекомендации</a>
+    <mark>Рекомендации</mark>
 </div>
-<!--<div class="text-center">-->
-<!--  <div class="spinner-border" style="width: 4rem; height: 4rem;" role="status">-->
-<!--    <span class="visually-hidden">Loading...</span>-->
-<!--  </div>-->
-<!--</div>-->
+<div class="text-center" id="loading">
+  <div class="spinner-border" style="width: 4rem; height: 4rem;" role="status">
+    <span class="visually-hidden">Loading...</span>
+  </div>
+</div>
+<div class="text-center my-2" id="empty-tweets" style="display: none;">
+    <h6 class="display-6">>_<</h6>
+    <p class="lead mb-0">Простите</p>
+    <p class="lead">Пока мы не можем ничего Вам порекомендовать</p>
+</div>
 <div class="row mt-3">
     <div class="col-3"></div>
         <div class="list-group col-5">
@@ -93,38 +98,21 @@
   }
   
       const parent = document.querySelector('#list-of-tweets');
-      let progress = 10;
-      const pageHeight = document.documentElement.clientHeight;
   
       const existingTweets = new Set();
   
-      loadData(0);
+      loadData();
+
   
-      window.addEventListener('scroll', isEnd);
-  
-      function isEnd(){
-          
-          // if we have enough time it should be rewrite with fetch cause it sends 2 responses while generate one result
-          const t = document.querySelector('.navigation');
-          // console.log(t.offsetHeight);
-          const bottomLineOfHtml = document.documentElement.getBoundingClientRect().bottom;
-          // console.log(bottomLineOfHtml);
-          // console.log(pageHeight);
-          // console.log('--------------------------------------')
-          if (bottomLineOfHtml <= pageHeight + 50){
-              loadData(progress);
-              progress+=10;
-          }
-      }
-  
-      function loadData(progress){
+      function loadData(){
           const xhr = new XMLHttpRequest();
           xhr.responseType = 'json';
           // <int:pk>/get/tweets/<int:start>
-          let url = '/get/top-tweets/'+progress;
+          let url = '/get/recommended-tweets';
           xhr.open('GET', url);
           xhr.onload = function(){
               result = xhr.response;
+              document.querySelector('#loading').remove()
               if (result.data){
                   for (let item of result.data){
                       let tempId = item.tweetId;
@@ -133,6 +121,8 @@
                           generateTweet(item, 'after');
                       }
                   }
+              } else if (result.msg = 'no_rec') {
+                document.querySelector('#empty-tweets').style.display = 'block';
               }
           }
           xhr.send();
@@ -182,35 +172,6 @@
               xhr.send(json);
           }
   
-      })
-  
-      parent.addEventListener('click', function(){
-          const btn = event.target.closest('a');
-          if (btn && btn.classList.contains('delete-btn')){
-              event.preventDefault();
-              if (confirm('Вы действительно хотите удалить этот твит?')){
-                  
-                  let json = JSON.stringify({});
-                  const xhr = new XMLHttpRequest();
-                  xhr.responseType = 'json';
-  
-                  xhr.open('DELETE', btn.href);
-                  xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
-                  xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
-                  xhr.onload = function(){
-                      const response = xhr.response;
-  
-                      if (xhr.status === 200){
-                          console.log(xhr.statusText)
-                          tweet = btn.closest('.tweet').parentNode;
-                          console.log(tweet);
-                          tweet.remove();
-                      }
-                      // also add 400 and 500 status and 401/403
-                  }
-                  xhr.send(json);
-              }
-          }
       })
   </script>
 {% endblock %}

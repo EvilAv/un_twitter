@@ -14,7 +14,7 @@
             {% if user == viewed_user %}
             <form action="{% url 'tweet-create' %}" method="post" id="tweet-creator">
                 {% csrf_token %}
-                <textarea class="form-control" name="text"></textarea>
+                <textarea class="form-control" name="text" placeholder="Что у Вас нового?"></textarea>
                 <div class="d-grid">
                     <button class="btn btn-dark" type="submit">Tweet</button>
                 </div>

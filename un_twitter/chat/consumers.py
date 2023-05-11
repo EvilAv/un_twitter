@@ -35,8 +35,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def receive(self, text_data=None, bytes_data=None):
         data = json.loads(text_data)
 
-        print(data)
-
         type = data['type']
         if type == 'send-msg':
             text = data['text']
