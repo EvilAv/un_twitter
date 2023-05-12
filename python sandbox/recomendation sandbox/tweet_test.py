@@ -22,6 +22,7 @@ ratings_dict = {
     "is_liked": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 }
 
+
 df = pd.DataFrame(ratings_dict)
 reader = Reader(rating_scale=(0, 1))
 
@@ -95,7 +96,7 @@ def get_top_n(user, unviewed_tweets, n=10):
     #     top_n[uid] = user_ratings[:n]
     #
     # return top_n
-    predictions = algo.test(dataset)
+    predictions = loaded_algo.test(dataset)
     raw_list = []
     for uid, iid, true_r, est, _ in predictions:
         raw_list.append((iid, est))
@@ -108,4 +109,4 @@ def get_top_n(user, unviewed_tweets, n=10):
     return res
 
 
-print(get_top_n('D', [1, 2, 3, 4, 5, 6]))
+print(get_top_n('E', [1, 2, 3, 4, 5, 6]))

@@ -20,7 +20,7 @@ def train_system(dataset_dict):
     }
     algo = KNNWithMeans(sim_options=sim_options)
 
-    cross_validate(algo, data, verbose=False)
+    cross_validate(algo, data, verbose=True)
 
     dump.dump(file_name, algo=algo)
 
@@ -44,4 +44,4 @@ def get_top_predictions(user, unviewed_tweets, n=10):
     for i in raw_list:
         res.append(i[0])
     print(raw_list)
-    return res
+    return res[:n]

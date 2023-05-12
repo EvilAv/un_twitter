@@ -1,4 +1,3 @@
-import datetime
 from django.shortcuts import render, get_object_or_404, redirect, reverse
 from django.http import JsonResponse
 from .models import Tweet, Comment, Rate
@@ -8,6 +7,7 @@ from django.utils import timezone
 from django.contrib.auth.decorators import login_required
 import time
 from .recomend import train_system, get_top_predictions
+from django.core.exceptions import ObjectDoesNotExist
 
 
 # Create your views here.
@@ -176,9 +176,14 @@ def get_followers_tweets(request, start):
 
 @login_required
 def get_recommended_tweets(request):
-    list_of_id = get_recommends_list(request.user, get_unviewed_list(request.user))
-    tweets_list = Tweet.objects.filter(pk__in=list_of_id)
-    json_list = [i.serialize(request.user) for i in tweets_list]
+    list_of_id = get_recommends_list(str(request.user.pk), get_unviewed_list(request.user))
+    json_list = []
+    for tweet_id in list_of_id:
+        try:
+            t = Tweet.objects.get(pk=tweet_id)
+            json_list.append(t.serialize(request.user))
+        except ObjectDoesNotExist:
+            continue
     if not json_list:
         data = {
             'msg': 'no_rec'
@@ -200,7 +205,7 @@ def make_dataset():
                 continue
             is_rated = Rate.objects.filter(author=user, parent=item)
             dataset['item'].append(item.pk)
-            dataset['user'].append(user.pk)
+            dataset['user'].append(str(user.pk))
             if is_rated:
                 dataset['is_liked'].append(1)
             else:
